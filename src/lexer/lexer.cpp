@@ -104,7 +104,7 @@ void Lexer::lex_token() {
             }
             break;
     }
-}
+} // !lex_token
 
 void Lexer::add_token(TokenKind kind) {
     std::string lexeme = source.substr(start, current - start);
