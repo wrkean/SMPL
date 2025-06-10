@@ -63,6 +63,7 @@ Floating-point types are also named this way, without the signedness.
 # Prerequisites
 - clang (or any C++23 compiler)
 - C++23
+- [Magic enums](https://github.com/Neargye/magic_enum)
 # Build
 To build, simply compile all the source file with a -Iinclude option (also, don't forget the standard version) (e.g. `g++ src/**/*.cpp -o smpl -Iinclude std=c++23`).
 # Run
