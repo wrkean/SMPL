@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/data/data/com.termux/files/home/Dev/Cpp/smpl/build",
+  "command": "/data/data/com.termux/files/usr/bin/c++  -I/data/data/com.termux/files/home/Dev/Cpp/smpl/include -O2 -g -DNDEBUG -std=gnu++23 -o CMakeFiles/app.dir/src/main.cpp.o -c /data/data/com.termux/files/home/Dev/Cpp/smpl/src/main.cpp",
+  "file": "/data/data/com.termux/files/home/Dev/Cpp/smpl/src/main.cpp",
+  "output": "CMakeFiles/app.dir/src/main.cpp.o"
+}
+]
