@@ -10,11 +10,12 @@ SMPL aims to be as simple as possible, much like C but with more type-safety and
 // a value of type i32
 defn pow(base: i32, exp: i32) -> i32 {
     // Range-based for loop
-    for i in 1..exp {
-        base *= base;
+    let result: i32 = 1;
+    for i in 0..exp {
+        result *= base;
     }
 
-    return base;
+    return result;
 }
 
 // Entry function `main`
