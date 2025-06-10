@@ -2,16 +2,9 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+
+// External library
 #include <magic_enum/magic_enum.hpp>
-
-void run(const std::string& source) {
-    Lexer lexer(std::move(source)); // Lexer owns the source string
-    auto& tokens = lexer.lex();
-
-    for (auto& token : tokens) {
-        std::cout << token.lexeme << " <=> " << magic_enum::enum_name(token.kind) << "\n";
-    }
-}
 
 std::string file_to_strbuf(const std::string& path) {
     std::ifstream source(path);
@@ -25,6 +18,16 @@ std::string file_to_strbuf(const std::string& path) {
 
     return buf.str();
 }
+
+void run(const std::string& source) {
+    Lexer lexer(std::move(source)); // Lexer owns the source string
+    auto& tokens = lexer.lex();
+
+    for (auto& token : tokens) {
+        std::cout << token.lexeme << " <=> " << magic_enum::enum_name(token.kind) << "\n";
+    }
+}
+
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
