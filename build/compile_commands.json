@@ -1,8 +1,26 @@
 [
 {
   "directory": "/data/data/com.termux/files/home/Dev/Cpp/smpl/build",
+  "command": "/data/data/com.termux/files/usr/bin/c++  -I/data/data/com.termux/files/home/Dev/Cpp/smpl/include -O2 -g -DNDEBUG -std=gnu++23 -o CMakeFiles/app.dir/src/lexer/lexer.cpp.o -c /data/data/com.termux/files/home/Dev/Cpp/smpl/src/lexer/lexer.cpp",
+  "file": "/data/data/com.termux/files/home/Dev/Cpp/smpl/src/lexer/lexer.cpp",
+  "output": "CMakeFiles/app.dir/src/lexer/lexer.cpp.o"
+},
+{
+  "directory": "/data/data/com.termux/files/home/Dev/Cpp/smpl/build",
+  "command": "/data/data/com.termux/files/usr/bin/c++  -I/data/data/com.termux/files/home/Dev/Cpp/smpl/include -O2 -g -DNDEBUG -std=gnu++23 -o CMakeFiles/app.dir/src/lexer/token.cpp.o -c /data/data/com.termux/files/home/Dev/Cpp/smpl/src/lexer/token.cpp",
+  "file": "/data/data/com.termux/files/home/Dev/Cpp/smpl/src/lexer/token.cpp",
+  "output": "CMakeFiles/app.dir/src/lexer/token.cpp.o"
+},
+{
+  "directory": "/data/data/com.termux/files/home/Dev/Cpp/smpl/build",
   "command": "/data/data/com.termux/files/usr/bin/c++  -I/data/data/com.termux/files/home/Dev/Cpp/smpl/include -O2 -g -DNDEBUG -std=gnu++23 -o CMakeFiles/app.dir/src/main.cpp.o -c /data/data/com.termux/files/home/Dev/Cpp/smpl/src/main.cpp",
   "file": "/data/data/com.termux/files/home/Dev/Cpp/smpl/src/main.cpp",
   "output": "CMakeFiles/app.dir/src/main.cpp.o"
+},
+{
+  "directory": "/data/data/com.termux/files/home/Dev/Cpp/smpl/build",
+  "command": "/data/data/com.termux/files/usr/bin/c++  -I/data/data/com.termux/files/home/Dev/Cpp/smpl/include -O2 -g -DNDEBUG -std=gnu++23 -o CMakeFiles/app.dir/src/smpl.cpp.o -c /data/data/com.termux/files/home/Dev/Cpp/smpl/src/smpl.cpp",
+  "file": "/data/data/com.termux/files/home/Dev/Cpp/smpl/src/smpl.cpp",
+  "output": "CMakeFiles/app.dir/src/smpl.cpp.o"
 }
 ]

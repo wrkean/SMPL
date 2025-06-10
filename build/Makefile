@@ -113,6 +113,7 @@ preinstall/fast:
 
 # clear depends
 depend:
+	$(CMAKE_COMMAND) -P /data/data/com.termux/files/home/Dev/Cpp/smpl/build/CMakeFiles/VerifyGlobs.cmake
 	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
@@ -128,6 +129,54 @@ app: cmake_check_build_system
 app/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/build
 .PHONY : app/fast
+
+src/lexer/lexer.o: src/lexer/lexer.cpp.o
+.PHONY : src/lexer/lexer.o
+
+# target to build an object file
+src/lexer/lexer.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/lexer/lexer.cpp.o
+.PHONY : src/lexer/lexer.cpp.o
+
+src/lexer/lexer.i: src/lexer/lexer.cpp.i
+.PHONY : src/lexer/lexer.i
+
+# target to preprocess a source file
+src/lexer/lexer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/lexer/lexer.cpp.i
+.PHONY : src/lexer/lexer.cpp.i
+
+src/lexer/lexer.s: src/lexer/lexer.cpp.s
+.PHONY : src/lexer/lexer.s
+
+# target to generate assembly for a file
+src/lexer/lexer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/lexer/lexer.cpp.s
+.PHONY : src/lexer/lexer.cpp.s
+
+src/lexer/token.o: src/lexer/token.cpp.o
+.PHONY : src/lexer/token.o
+
+# target to build an object file
+src/lexer/token.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/lexer/token.cpp.o
+.PHONY : src/lexer/token.cpp.o
+
+src/lexer/token.i: src/lexer/token.cpp.i
+.PHONY : src/lexer/token.i
+
+# target to preprocess a source file
+src/lexer/token.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/lexer/token.cpp.i
+.PHONY : src/lexer/token.cpp.i
+
+src/lexer/token.s: src/lexer/token.cpp.s
+.PHONY : src/lexer/token.s
+
+# target to generate assembly for a file
+src/lexer/token.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/lexer/token.cpp.s
+.PHONY : src/lexer/token.cpp.s
 
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
@@ -153,6 +202,30 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/smpl.o: src/smpl.cpp.o
+.PHONY : src/smpl.o
+
+# target to build an object file
+src/smpl.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/smpl.cpp.o
+.PHONY : src/smpl.cpp.o
+
+src/smpl.i: src/smpl.cpp.i
+.PHONY : src/smpl.i
+
+# target to preprocess a source file
+src/smpl.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/smpl.cpp.i
+.PHONY : src/smpl.cpp.i
+
+src/smpl.s: src/smpl.cpp.s
+.PHONY : src/smpl.s
+
+# target to generate assembly for a file
+src/smpl.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/smpl.cpp.s
+.PHONY : src/smpl.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -162,9 +235,18 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... app"
+	@echo "... src/lexer/lexer.o"
+	@echo "... src/lexer/lexer.i"
+	@echo "... src/lexer/lexer.s"
+	@echo "... src/lexer/token.o"
+	@echo "... src/lexer/token.i"
+	@echo "... src/lexer/token.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/smpl.o"
+	@echo "... src/smpl.i"
+	@echo "... src/smpl.s"
 .PHONY : help
 
 
@@ -176,6 +258,7 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
+	$(CMAKE_COMMAND) -P /data/data/com.termux/files/home/Dev/Cpp/smpl/build/CMakeFiles/VerifyGlobs.cmake
 	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

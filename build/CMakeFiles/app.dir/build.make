@@ -72,10 +72,38 @@ include CMakeFiles/app.dir/flags.make
 CMakeFiles/app.dir/codegen:
 .PHONY : CMakeFiles/app.dir/codegen
 
+CMakeFiles/app.dir/src/lexer/lexer.cpp.o: CMakeFiles/app.dir/flags.make
+CMakeFiles/app.dir/src/lexer/lexer.cpp.o: /data/data/com.termux/files/home/Dev/Cpp/smpl/src/lexer/lexer.cpp
+CMakeFiles/app.dir/src/lexer/lexer.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/data/data/com.termux/files/home/Dev/Cpp/smpl/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/app.dir/src/lexer/lexer.cpp.o"
+	/data/data/com.termux/files/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/lexer/lexer.cpp.o -MF CMakeFiles/app.dir/src/lexer/lexer.cpp.o.d -o CMakeFiles/app.dir/src/lexer/lexer.cpp.o -c /data/data/com.termux/files/home/Dev/Cpp/smpl/src/lexer/lexer.cpp
+
+CMakeFiles/app.dir/src/lexer/lexer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/app.dir/src/lexer/lexer.cpp.i"
+	/data/data/com.termux/files/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /data/data/com.termux/files/home/Dev/Cpp/smpl/src/lexer/lexer.cpp > CMakeFiles/app.dir/src/lexer/lexer.cpp.i
+
+CMakeFiles/app.dir/src/lexer/lexer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/app.dir/src/lexer/lexer.cpp.s"
+	/data/data/com.termux/files/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /data/data/com.termux/files/home/Dev/Cpp/smpl/src/lexer/lexer.cpp -o CMakeFiles/app.dir/src/lexer/lexer.cpp.s
+
+CMakeFiles/app.dir/src/lexer/token.cpp.o: CMakeFiles/app.dir/flags.make
+CMakeFiles/app.dir/src/lexer/token.cpp.o: /data/data/com.termux/files/home/Dev/Cpp/smpl/src/lexer/token.cpp
+CMakeFiles/app.dir/src/lexer/token.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/data/data/com.termux/files/home/Dev/Cpp/smpl/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/app.dir/src/lexer/token.cpp.o"
+	/data/data/com.termux/files/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/lexer/token.cpp.o -MF CMakeFiles/app.dir/src/lexer/token.cpp.o.d -o CMakeFiles/app.dir/src/lexer/token.cpp.o -c /data/data/com.termux/files/home/Dev/Cpp/smpl/src/lexer/token.cpp
+
+CMakeFiles/app.dir/src/lexer/token.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/app.dir/src/lexer/token.cpp.i"
+	/data/data/com.termux/files/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /data/data/com.termux/files/home/Dev/Cpp/smpl/src/lexer/token.cpp > CMakeFiles/app.dir/src/lexer/token.cpp.i
+
+CMakeFiles/app.dir/src/lexer/token.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/app.dir/src/lexer/token.cpp.s"
+	/data/data/com.termux/files/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /data/data/com.termux/files/home/Dev/Cpp/smpl/src/lexer/token.cpp -o CMakeFiles/app.dir/src/lexer/token.cpp.s
+
 CMakeFiles/app.dir/src/main.cpp.o: CMakeFiles/app.dir/flags.make
 CMakeFiles/app.dir/src/main.cpp.o: /data/data/com.termux/files/home/Dev/Cpp/smpl/src/main.cpp
 CMakeFiles/app.dir/src/main.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/data/data/com.termux/files/home/Dev/Cpp/smpl/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/app.dir/src/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/data/data/com.termux/files/home/Dev/Cpp/smpl/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/app.dir/src/main.cpp.o"
 	/data/data/com.termux/files/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/main.cpp.o -MF CMakeFiles/app.dir/src/main.cpp.o.d -o CMakeFiles/app.dir/src/main.cpp.o -c /data/data/com.termux/files/home/Dev/Cpp/smpl/src/main.cpp
 
 CMakeFiles/app.dir/src/main.cpp.i: cmake_force
@@ -86,18 +114,38 @@ CMakeFiles/app.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/app.dir/src/main.cpp.s"
 	/data/data/com.termux/files/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /data/data/com.termux/files/home/Dev/Cpp/smpl/src/main.cpp -o CMakeFiles/app.dir/src/main.cpp.s
 
+CMakeFiles/app.dir/src/smpl.cpp.o: CMakeFiles/app.dir/flags.make
+CMakeFiles/app.dir/src/smpl.cpp.o: /data/data/com.termux/files/home/Dev/Cpp/smpl/src/smpl.cpp
+CMakeFiles/app.dir/src/smpl.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/data/data/com.termux/files/home/Dev/Cpp/smpl/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/app.dir/src/smpl.cpp.o"
+	/data/data/com.termux/files/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/smpl.cpp.o -MF CMakeFiles/app.dir/src/smpl.cpp.o.d -o CMakeFiles/app.dir/src/smpl.cpp.o -c /data/data/com.termux/files/home/Dev/Cpp/smpl/src/smpl.cpp
+
+CMakeFiles/app.dir/src/smpl.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/app.dir/src/smpl.cpp.i"
+	/data/data/com.termux/files/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /data/data/com.termux/files/home/Dev/Cpp/smpl/src/smpl.cpp > CMakeFiles/app.dir/src/smpl.cpp.i
+
+CMakeFiles/app.dir/src/smpl.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/app.dir/src/smpl.cpp.s"
+	/data/data/com.termux/files/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /data/data/com.termux/files/home/Dev/Cpp/smpl/src/smpl.cpp -o CMakeFiles/app.dir/src/smpl.cpp.s
+
 # Object files for target app
 app_OBJECTS = \
-"CMakeFiles/app.dir/src/main.cpp.o"
+"CMakeFiles/app.dir/src/lexer/lexer.cpp.o" \
+"CMakeFiles/app.dir/src/lexer/token.cpp.o" \
+"CMakeFiles/app.dir/src/main.cpp.o" \
+"CMakeFiles/app.dir/src/smpl.cpp.o"
 
 # External object files for target app
 app_EXTERNAL_OBJECTS =
 
+app: CMakeFiles/app.dir/src/lexer/lexer.cpp.o
+app: CMakeFiles/app.dir/src/lexer/token.cpp.o
 app: CMakeFiles/app.dir/src/main.cpp.o
+app: CMakeFiles/app.dir/src/smpl.cpp.o
 app: CMakeFiles/app.dir/build.make
 app: CMakeFiles/app.dir/compiler_depend.ts
 app: CMakeFiles/app.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/data/data/com.termux/files/home/Dev/Cpp/smpl/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable app"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/data/data/com.termux/files/home/Dev/Cpp/smpl/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable app"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/app.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

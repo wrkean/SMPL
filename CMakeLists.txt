@@ -9,7 +9,8 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/include
 )
 
-file(GLOB SRCS
+file(GLOB_RECURSE SRCS
+    CONFIGURE_DEPENDS
     "${PROJECT_SOURCE_DIR}/src/*"
 )
 

@@ -1,0 +1,16 @@
+defn pow(base: i32, exp: i32) -> i32 {
+    for i in 1..exp {
+        base *= base;
+    }
+
+    return base;
+}
+
+defn main() {
+    let x: i32 = 12;
+    let y: i32 = 14;
+    let z: i32 = x + y;
+
+    let w: i32 = pow(z, 2);
+    !fsdnfwe
+}

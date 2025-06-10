@@ -1,7 +1,13 @@
 file(REMOVE_RECURSE
   "CMakeFiles/app.dir/link.d"
+  "CMakeFiles/app.dir/src/lexer/lexer.cpp.o"
+  "CMakeFiles/app.dir/src/lexer/lexer.cpp.o.d"
+  "CMakeFiles/app.dir/src/lexer/token.cpp.o"
+  "CMakeFiles/app.dir/src/lexer/token.cpp.o.d"
   "CMakeFiles/app.dir/src/main.cpp.o"
   "CMakeFiles/app.dir/src/main.cpp.o.d"
+  "CMakeFiles/app.dir/src/smpl.cpp.o"
+  "CMakeFiles/app.dir/src/smpl.cpp.o.d"
   "app"
   "app.pdb"
 )

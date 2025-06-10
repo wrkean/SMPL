@@ -8,7 +8,10 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/data/data/com.termux/files/home/Dev/Cpp/smpl/src/lexer/lexer.cpp" "CMakeFiles/app.dir/src/lexer/lexer.cpp.o" "gcc" "CMakeFiles/app.dir/src/lexer/lexer.cpp.o.d"
+  "/data/data/com.termux/files/home/Dev/Cpp/smpl/src/lexer/token.cpp" "CMakeFiles/app.dir/src/lexer/token.cpp.o" "gcc" "CMakeFiles/app.dir/src/lexer/token.cpp.o.d"
   "/data/data/com.termux/files/home/Dev/Cpp/smpl/src/main.cpp" "CMakeFiles/app.dir/src/main.cpp.o" "gcc" "CMakeFiles/app.dir/src/main.cpp.o.d"
+  "/data/data/com.termux/files/home/Dev/Cpp/smpl/src/smpl.cpp" "CMakeFiles/app.dir/src/smpl.cpp.o" "gcc" "CMakeFiles/app.dir/src/smpl.cpp.o.d"
   "" "app" "gcc" "CMakeFiles/app.dir/link.d"
   )
 
