@@ -61,7 +61,7 @@ Floating-point types are also named this way, without the signedness.
 - Strings
 - Enums
 # Prerequisites
-- clang (or any C++23 compiler)
+- clang
 - C++23
 - [Magic enums](https://github.com/Neargye/magic_enum)
 # Build
