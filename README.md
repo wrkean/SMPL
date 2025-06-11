@@ -34,7 +34,7 @@ defn main() {
 - ❌ Type inference(?)
 
 # Primitive Types
-An integer's name caan be composed of its signedness and its bit-width. For example, i32 means it is a signed 32-bit integer and u32 means it is an unsigned 32-bit integer.
+An integer's name can be composed of its signedness and its bit-width. For example, i32 means it is a signed 32-bit integer and u32 means it is an unsigned 32-bit integer.
 Floating-point types are also named this way, without the signedness.
 
 **Here are the primitive types for SMPL:**
@@ -52,6 +52,8 @@ Floating-point types are also named this way, without the signedness.
 - f32
 - f64
 - f128
+- char
+- bool
 # Composite types
 **SMPL composite types will be composed of:**
 - Class

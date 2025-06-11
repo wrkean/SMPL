@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lexer/tokenkind.hpp"
+#include "token/tokenkind.hpp"
 #include <cstddef>
 #include <string>
 

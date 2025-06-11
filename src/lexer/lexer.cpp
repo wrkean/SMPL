@@ -1,5 +1,5 @@
 #include "lexer/lexer.hpp"
-#include "lexer/tokenkind.hpp"
+#include "token/tokenkind.hpp"
 #include "smpl.hpp"
 #include <format>
 #include <stdexcept>

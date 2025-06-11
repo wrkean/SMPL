@@ -1,7 +1,7 @@
 #pragma once
 
-#include "lexer/token.hpp"
-#include "lexer/tokenkind.hpp"
+#include "token/token.hpp"
+#include "token/tokenkind.hpp"
 #include <string>
 #include <unordered_map>
 #include <vector>
