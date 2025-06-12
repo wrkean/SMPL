@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-Lexer::Lexer(const std::string& source)
+Lexer::Lexer(const std::string&& source)
     : source(std::move(source)), line(1), start(0), current(0)
 {
     keywords.emplace("defn", TokenKind::Defn);

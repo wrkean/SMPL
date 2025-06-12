@@ -8,7 +8,7 @@
 
 class Lexer {
 public:
-    Lexer(const std::string& source);
+    Lexer(const std::string&& source);
     std::vector<Token>& lex();
 
 private:
