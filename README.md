@@ -52,7 +52,7 @@ Floating-point types are also named this way, without the signedness.
 - f32
 - f64
 - f128
-- char
+- char (only supports ASCII)
 - bool
 # Composite types
 **SMPL composite types will be composed of:**
@@ -63,7 +63,7 @@ Floating-point types are also named this way, without the signedness.
 - Strings
 - Enums
 # Prerequisites
-- clang
+- clang (or any C++23 compiler)
 - C++23
 - [Magic enums](https://github.com/Neargye/magic_enum)
 # Build
