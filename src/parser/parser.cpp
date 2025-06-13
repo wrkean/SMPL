@@ -1,7 +1,9 @@
 #include "parser/parser.hpp"
 #include "ast/binary.hpp"
 #include "ast/expr.hpp"
+#include "ast/grouping.hpp"
 #include "ast/num_literal.hpp"
+#include "smpl.hpp"
 #include "token/tokenkind.hpp"
 #include <memory>
 #include <stdexcept>
@@ -31,6 +33,15 @@ std::unique_ptr<ExprNode> Parser::nud(Token token) {
         case TokenKind::NumLiteral:
             advance();
             return std::make_unique<NumLitNode>(NumLitNode(token));
+        case TokenKind::LeftParen: {
+            advance();  // Consume '('
+            auto expr = parse_expression();
+            if (peek().kind != TokenKind::RightParen) {
+                Smpl::error(peek().line, "Expected ')'");
+            }
+            advance();  // Consume ')'
+            return std::make_unique<GroupingExpr>(GroupingExpr(std::move(expr)));
+        }
         default:
             // TODO: Error just for debugging, change later
             throw std::runtime_error("Expected expression");

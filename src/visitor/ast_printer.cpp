@@ -1,6 +1,7 @@
 #include "visitor/ast_printer.hpp"
 #include "ast/binary.hpp"
 #include "ast/expr.hpp"
+#include "ast/grouping.hpp"
 #include "ast/num_literal.hpp"
 #include <iostream>
 
@@ -18,4 +19,10 @@ void ASTPrinter::visit(BinaryExpr& expr) {
 
 void ASTPrinter::visit(NumLitNode& expr) {
     std::cout << expr.literal.lexeme;
+}
+
+void ASTPrinter::visit(GroupingExpr& expr) {
+    std::cout << "group{";
+    expr.expr->accept(*this);
+    std::cout << "}";
 }
