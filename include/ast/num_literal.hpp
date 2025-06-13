@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ast/expr.hpp"
-#include "ast/visitor/visitor.hpp"
+#include "visitor/visitor.hpp"
 #include "token/token.hpp"
 
 class NumLitNode : public ExprNode {

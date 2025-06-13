@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ast/expr.hpp"
-#include "ast/visitor/visitor.hpp"
+#include "visitor/visitor.hpp"
 
 class ASTPrinter : public Visitor {
 public:

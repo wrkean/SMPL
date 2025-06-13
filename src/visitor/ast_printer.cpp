@@ -1,4 +1,4 @@
-#include "ast/visitor/ast_printer.hpp"
+#include "visitor/ast_printer.hpp"
 #include "ast/binary.hpp"
 #include "ast/expr.hpp"
 #include "ast/num_literal.hpp"
