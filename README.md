@@ -71,7 +71,8 @@ Floating-point types are also named this way, without the signedness.
 # Build
 To build, simply compile all the source file with a -Iinclude option (also, don't forget the standard version) (e.g. `g++ src/**/*.cpp -o smpl -Iinclude std=c++23`).
 # Run
-Run the executable with the command 
+Run the executable with the command
+> The current state of the compiler can only be able to parse expressions! If your source file contains anything other than just expressions, it will not parse the program and throw an error.
 ```
 ./<executable> source_file.spl
 ```
