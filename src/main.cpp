@@ -1,4 +1,6 @@
+#include "ast/visitor/ast_printer.hpp"
 #include "lexer/lexer.hpp"
+#include "parser/parser.hpp"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -26,6 +28,11 @@ void run(const std::string& source) {
     for (auto& token : tokens) {
         std::cout << token.lexeme << " <=> " << magic_enum::enum_name(token.kind) << "\n";
     }
+
+    Parser parser(std::move(tokens));
+    auto expr = parser.parse();
+    ASTPrinter printer;
+    printer.print(*expr);
 }
 
 
