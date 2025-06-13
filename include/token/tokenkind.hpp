@@ -6,6 +6,7 @@ enum class TokenKind {
     As,
     For,
     Return,
+    In,
 
     LeftParen,
     RightParen,
