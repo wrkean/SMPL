@@ -1,5 +1,5 @@
 #include "ast/num_literal.hpp"
-#include "ast/visitor/visitor.hpp"
+#include "visitor/visitor.hpp"
 
 NumLitNode::NumLitNode(Token literal)
     : literal(literal) { }

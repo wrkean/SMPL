@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ast/visitor/visitor.hpp"
+#include "visitor/visitor.hpp"
 
 class ExprNode {
 public:

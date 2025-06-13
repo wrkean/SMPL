@@ -1,4 +1,4 @@
-#include "ast/visitor/ast_printer.hpp"
+#include "visitor/ast_printer.hpp"
 #include "lexer/lexer.hpp"
 #include "parser/parser.hpp"
 #include <fstream>
