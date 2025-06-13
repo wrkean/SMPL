@@ -30,8 +30,10 @@ defn main() {
 ```
 # Progress
 - 🟡 Lexical analysis is partially done. The compiler for now will output the lexeme and its token kind representation.
-- ❌ Syntax analysis (parsing)
+- 🟡 Only able to parse simple literal arithmetic expressions with grouping for now (e.g. 4 * (3 + 2))
 - ❌ Type inference(?)
+- ❌ OOP
+- ❌ Composite types (arrays, class, hashmaps, etc.)
 
 # Primitive Types
 An integer's name can be composed of its signedness and its bit-width. For example, i32 means it is a signed 32-bit integer and u32 means it is an unsigned 32-bit integer.
