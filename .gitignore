@@ -1,5 +1,4 @@
 .cache/
 build/
 tool/
-CMakeLists.txt
 samples/

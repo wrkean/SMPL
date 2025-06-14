@@ -73,11 +73,12 @@ Floating-point types are also named this way, without the signedness.
 - Strings
 - Enums
 # Prerequisites
+- [CMake](https://cmake.org/download/) (Optional if you want to build the code yourself)
 - clang (or any C++23 compiler)
 - C++23
-- [Magic enums](https://github.com/Neargye/magic_enum)
+- [Magic enums](https://github.com/Neargye/magic_enum) (Optional, for printing the token kinds)
 # Build
-To build, simply compile all the source file with a -Iinclude option (also, don't forget the standard version) (e.g. `g++ src/**/*.cpp -o smpl -Iinclude std=c++23`).
+To build, execute `cmake .` under the same directory as CMakeLists.txt
 # Run
 Run the executable with the command
 > The current state of the compiler can only be able to parse expressions! If your source file contains anything other than just expressions, it will not parse the program and throw an error.
