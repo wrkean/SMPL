@@ -1,6 +1,14 @@
 # Description
 SMPL will be compiled down to C, which is then again compiled down to machine code by clang.
 This project has not been finished yet and won't be supporting OOP until the language is capable of doing tasks using the FP paradigm.
+
+The current state of the compiler outputs a rough AST representation of the given expression. The output would be fornatted like this: **(operator left right)**.
+
+Examples:
+- 8 + 2 => (+ 8 2)
+- 10 + 12 * 5 => (+ 10 (* 12 5))
+- (10 + 12) * 5 => (* group{(+ 10 12)} 5)
+
 # Goal
 SMPL aims to be as simple as possible, much like C but with more type-safety and other safety features.
 # Example Code
