@@ -1,4 +1,3 @@
-#include "visitor/ast_printer.hpp"
 #include "lexer/lexer.hpp"
 #include "parser/parser.hpp"
 #include <fstream>
@@ -31,8 +30,7 @@ void run(const std::string& source) {
 
     Parser parser(std::move(tokens));
     auto expr = parser.parse();
-    ASTPrinter printer;
-    printer.print(*expr);
+    expr->print();
 }
 
 

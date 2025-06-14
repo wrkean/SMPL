@@ -1,8 +1,8 @@
 #include "parser/parser.hpp"
-#include "ast/binary.hpp"
-#include "ast/expr.hpp"
-#include "ast/grouping.hpp"
-#include "ast/num_literal.hpp"
+#include "ast/expr/binary.hpp"
+#include "ast/expr/expr.hpp"
+#include "ast/expr/grouping.hpp"
+#include "ast/expr/num_literal.hpp"
 #include "smpl.hpp"
 #include "token/tokenkind.hpp"
 #include <memory>
