@@ -4,10 +4,10 @@
 #include <memory>
 #include <vector>
 
-class BlockNode : public Stmt {
+class BlockNode : public StmtNode {
 public:
-    BlockNode(std::vector<std::unique_ptr<Stmt>> statements);
+    BlockNode(std::vector<std::unique_ptr<StmtNode>> statements);
     void print() const override;
 
-    std::vector<std::unique_ptr<Stmt>> statements;
+    std::vector<std::unique_ptr<StmtNode>> statements;
 };

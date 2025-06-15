@@ -5,7 +5,7 @@
 #include <utility>
 #include <vector>
 
-class ParamNode : public Stmt {
+class ParamNode : public StmtNode {
 public:
     ParamNode(std::vector<std::pair<Token, Token>> params);
     void print() const override;

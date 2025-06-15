@@ -1,7 +1,7 @@
 #pragma once
 
-class Stmt {
+class StmtNode {
 public:
-    virtual ~Stmt() = default;
+    virtual ~StmtNode() = default;
     virtual void print() const = 0;
 };
