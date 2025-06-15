@@ -1,0 +1,14 @@
+#include "ast/stmt/for.hpp"
+#include <iostream>
+
+ForNode::ForNode(Token bind_var, std::unique_ptr<ExprNode> iterator, std::unique_ptr<StmtNode> block)
+    : bind_var(bind_var), iterator(std::move(iterator)), block(std::move(block)) { }
+
+void ForNode::print() const {
+    std::cout << "Bind var: " << bind_var.lexeme << "\n";
+    std::cout << "In: ";
+    iterator->print();
+    std::cout << "\n";
+    std::cout << "Block: ";
+    block->print();
+}

@@ -33,6 +33,7 @@ private:
     std::unique_ptr<StmtNode> parse_block();
     std::unique_ptr<StmtNode> parse_assignment();
     std::unique_ptr<StmtNode> parse_return();
+    std::unique_ptr<StmtNode> parse_for();
 
     // Expressions
     std::unique_ptr<ExprNode> parse_expression(int prec = 0);

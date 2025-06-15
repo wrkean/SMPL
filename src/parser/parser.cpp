@@ -8,6 +8,7 @@
 #include "ast/stmt/assignment.hpp"
 #include "ast/stmt/block.hpp"
 #include "ast/stmt/fndecl.hpp"
+#include "ast/stmt/for.hpp"
 #include "ast/stmt/param.hpp"
 #include "ast/stmt/return.hpp"
 #include "ast/stmt/stmt.hpp"
@@ -27,6 +28,7 @@ static std::unordered_map<TokenKind, OperatorInfo> operator_table = {
     {TokenKind::Equal,     {1, Assoc::Right}}, // assignment
     // {TokenKind::Or,        {2, Assoc::Left}},
     // {TokenKind::And,       {3, Assoc::Left}},
+    {TokenKind::Range,     {5, Assoc::Left}},
     {TokenKind::Plus,      {10, Assoc::Left}},
     {TokenKind::Minus,     {10, Assoc::Left}},
     {TokenKind::Star,      {20, Assoc::Left}},
@@ -56,6 +58,8 @@ std::unique_ptr<StmtNode> Parser::parse_statement() {
             return parse_assignment();
         case TokenKind::Return:
             return parse_return();
+        case TokenKind::For:
+            return parse_for();
         // TODO: Parse more statements
         default:
             Smpl::error(peek().line, std::format("Unexpected token: {}", peek().lexeme));
@@ -136,6 +140,18 @@ std::unique_ptr<StmtNode> Parser::parse_return() {
     auto expr = parse_expression();
     consume(TokenKind::SemiColon);
     return std::make_unique<ReturnNode>(ReturnNode(std::move(expr)));
+}
+
+std::unique_ptr<StmtNode> Parser::parse_for() {
+    consume(TokenKind::For);
+    Token bind_var = consume(TokenKind::Identifier);
+    consume(TokenKind::In);
+    auto iterator = parse_expression();
+    consume(TokenKind::LeftBrace);
+    auto block = parse_block();
+    consume(TokenKind::RightBrace);
+
+    return std::make_unique<ForNode>(ForNode(bind_var, std::move(iterator), std::move(block)));
 }
 
 std::unique_ptr<ExprNode> Parser::parse_expression(int prec) {

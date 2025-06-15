@@ -14,6 +14,7 @@ Lexer::Lexer(const std::string&& source)
     keywords.emplace("as", TokenKind::As);
     keywords.emplace("return", TokenKind::Return);
     keywords.emplace("in", TokenKind::In);
+    keywords.emplace("for", TokenKind::For);
 }
 
 std::vector<Token>& Lexer::lex() {
