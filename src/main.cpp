@@ -28,9 +28,13 @@ void run(const std::string& source) {
         std::cout << token.lexeme << " <=> " << magic_enum::enum_name(token.kind) << "\n";
     }
 
+    std::cout << "Got here\n";
     Parser parser(std::move(tokens));
-    auto expr = parser.parse();
-    expr->print();
+    auto statements = parser.parse();
+    for (auto& statement : statements) {
+        statement->print();
+        std::cout << "\n";
+    }
 }
 
 
