@@ -1,7 +1,9 @@
 #include "parser/parser.hpp"
 #include "ast/expr/binary.hpp"
 #include "ast/expr/expr.hpp"
+#include "ast/expr/fncall.hpp"
 #include "ast/expr/grouping.hpp"
+#include "ast/expr/identifier.hpp"
 #include "ast/expr/num_literal.hpp"
 #include "ast/stmt/assignment.hpp"
 #include "ast/stmt/block.hpp"
@@ -17,8 +19,20 @@
 #include <memory>
 #include <optional>
 #include <stdexcept>
+#include <unordered_map>
 #include <utility>
 #include <vector>
+
+static std::unordered_map<TokenKind, OperatorInfo> operator_table = {
+    {TokenKind::Equal,     {1, Assoc::Right}}, // assignment
+    // {TokenKind::Or,        {2, Assoc::Left}},
+    // {TokenKind::And,       {3, Assoc::Left}},
+    {TokenKind::Plus,      {10, Assoc::Left}},
+    {TokenKind::Minus,     {10, Assoc::Left}},
+    {TokenKind::Star,      {20, Assoc::Left}},
+    {TokenKind::ForSlash,  {20, Assoc::Left}},
+    // {TokenKind::Power,     {30, Assoc::Right}}, // e.g. **
+};
 
 Parser::Parser(const std::vector<Token>&& tokens)
     : tokens(std::move(tokens)), current(0) { }
@@ -136,6 +150,23 @@ std::unique_ptr<ExprNode> Parser::parse_expression(int prec) {
     return left;
 }
 
+std::unique_ptr<ExprNode> Parser::parse_fncall(Token id) {
+    std::vector<std::unique_ptr<ExprNode>> args;
+    consume(TokenKind::LeftParen);
+
+    while (peek().kind != TokenKind::RightParen) {
+        args.push_back(std::move(parse_expression()));
+        if (peek().kind == TokenKind::Comma) {
+            advance();
+        } else if (peek().kind != TokenKind::RightParen) {
+            // FIXME: Handle errors gracefully
+            throw std::runtime_error("Expected ')' or ','");
+        }
+    }
+    consume(TokenKind::RightParen);
+    return std::make_unique<FuncCallNode>(FuncCallNode(id, std::move(args)));
+}
+
 std::unique_ptr<ExprNode> Parser::nud(Token token) {
     switch (token.kind) {
         case TokenKind::NumLiteral:
@@ -150,6 +181,14 @@ std::unique_ptr<ExprNode> Parser::nud(Token token) {
             advance();  // Consume ')'
             return std::make_unique<GroupingExpr>(GroupingExpr(std::move(expr)));
         }
+        case TokenKind::Identifier: {
+            Token id = advance();
+            if (peek().kind == TokenKind::LeftParen) {
+                auto fncall = parse_fncall(id);
+                return fncall;
+            }
+            return std::make_unique<IdentifierNode>(IdentifierNode(id));
+        }
         default:
             Smpl::error(peek().line, std::format("Current token: {}", peek().lexeme));
             // TODO: Error just for debugging, change later
@@ -159,21 +198,24 @@ std::unique_ptr<ExprNode> Parser::nud(Token token) {
 
 std::unique_ptr<ExprNode> Parser::led(Token op, std::unique_ptr<ExprNode> left) {
     int prec = get_precedence(op);
-    auto right = parse_expression(prec);
+    Assoc assoc = get_associativity(op);
+    int next_prec = (assoc == Assoc::Left) ? prec : prec - 1;
+
+    auto right = parse_expression(next_prec);
     return std::make_unique<BinaryExpr>(BinaryExpr(op, std::move(left), std::move(right)));
 }
 
 int Parser::get_precedence(Token op) {
-    switch (op.kind) {
-        case TokenKind::Plus:
-        case TokenKind::Minus:
-            return 10;
-        case TokenKind::Star:
-        case TokenKind::ForSlash:
-            return 20;
-        default:
-            return 0;
+    if (operator_table.contains(op.kind)) {
+        auto op_info = operator_table.at(op.kind);
+        return op_info.precedence;
     }
+    return 0;
+}
+
+Assoc Parser::get_associativity(Token op) {
+    auto op_info = operator_table.at(op.kind);
+    return op_info.associativity;
 }
 
 Token Parser::consume(TokenKind expected) {
@@ -190,6 +232,14 @@ Token Parser::advance() {
 
 Token Parser::peek() const {
     return tokens[current];
+}
+
+bool Parser::match(TokenKind kind) {
+    if (peek().kind == kind) {
+        advance();
+        return true;
+    }
+    return false;
 }
 
 bool Parser::at_end() const {
