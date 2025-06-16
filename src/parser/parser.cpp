@@ -1,5 +1,6 @@
 #include "parser/parser.hpp"
 #include "ast/expr/binary.hpp"
+#include "ast/expr/boolean_literal.hpp"
 #include "ast/expr/expr.hpp"
 #include "ast/expr/fncall.hpp"
 #include "ast/expr/grouping.hpp"
@@ -7,17 +8,21 @@
 #include "ast/expr/num_literal.hpp"
 #include "ast/stmt/assignment.hpp"
 #include "ast/stmt/block.hpp"
+#include "ast/stmt/condition_block.hpp"
+#include "ast/stmt/expr_stmt.hpp"
 #include "ast/stmt/fndecl.hpp"
 #include "ast/stmt/for.hpp"
+#include "ast/stmt/if.hpp"
 #include "ast/stmt/param.hpp"
 #include "ast/stmt/return.hpp"
 #include "ast/stmt/stmt.hpp"
+#include "ast/stmt/unary.hpp"
+#include "ast/stmt/while.hpp"
 #include "error_reporter/compiler_err.hpp"
 #include "smpl.hpp"
 #include "token/token.hpp"
 #include "token/tokenkind.hpp"
 #include <format>
-#include <iostream>
 #include <magic_enum/magic_enum.hpp>
 #include <memory>
 #include <optional>
@@ -26,6 +31,7 @@
 #include <utility>
 #include <vector>
 
+// For infix operators
 static std::unordered_map<TokenKind, OperatorInfo> operator_table = {
     {TokenKind::Equal,     {1, Assoc::Right}}, // assignment
     // {TokenKind::Or,        {2, Assoc::Left}},
@@ -68,11 +74,18 @@ std::unique_ptr<StmtNode> Parser::parse_statement() {
             return parse_return();
         case TokenKind::For:
             return parse_for();
-        // TODO: Implement
-        // case TokenKind::If:
-        //     return parse_if();
-        // case TokenKind::While:
-        //     return parse_while();
+        case TokenKind::If:
+            return parse_if();
+        case TokenKind::While:
+            return parse_while();
+        case TokenKind::Identifier:
+        case TokenKind::NumLiteral:
+        case TokenKind::True:
+        case TokenKind::False:
+        case TokenKind::LeftParen:
+        case TokenKind::Not:
+        case TokenKind::Minus:
+            return parse_expr_stmt();
         default:
             throw SyntaxError(std::format("Unexpected token: {}", peek().lexeme));
     }
@@ -94,7 +107,7 @@ std::unique_ptr<StmtNode> Parser::parse_fndecl() {
     }
 
     auto block = parse_block();
-    return std::make_unique<DefnNode>(DefnNode(identifier, std::move(params), return_type, std::move(block)));
+    return std::make_unique<DefnNode>(identifier, std::move(params), return_type, std::move(block));
 }
 
 std::unique_ptr<StmtNode> Parser::parse_block() {
@@ -111,7 +124,7 @@ std::unique_ptr<StmtNode> Parser::parse_block() {
         }
     }
     consume(TokenKind::RightBrace);
-    return std::make_unique<BlockNode>(BlockNode(std::move(statements)));
+    return std::make_unique<BlockNode>(std::move(statements));
 }
 
 std::unique_ptr<StmtNode> Parser::parse_params() {
@@ -132,7 +145,7 @@ std::unique_ptr<StmtNode> Parser::parse_params() {
         }
     }
     consume(TokenKind::RightParen);
-    return std::make_unique<ParamNode>(ParamNode(params));
+    return std::make_unique<ParamNode>(params);
 }
 
 std::unique_ptr<StmtNode> Parser::parse_assignment() {
@@ -147,14 +160,14 @@ std::unique_ptr<StmtNode> Parser::parse_assignment() {
     auto right = parse_expression();
     consume(TokenKind::SemiColon);
 
-    return std::make_unique<AssignmentNode>(AssignmentNode(identifier, type, op, std::move(right)));
+    return std::make_unique<AssignmentNode>(identifier, type, op, std::move(right));
 }
 
 std::unique_ptr<StmtNode> Parser::parse_return() {
     consume(TokenKind::Return);
     auto expr = parse_expression();
     consume(TokenKind::SemiColon);
-    return std::make_unique<ReturnNode>(ReturnNode(std::move(expr)));
+    return std::make_unique<ReturnNode>(std::move(expr));
 }
 
 std::unique_ptr<StmtNode> Parser::parse_for() {
@@ -164,7 +177,41 @@ std::unique_ptr<StmtNode> Parser::parse_for() {
     auto iterator = parse_expression();
     auto block = parse_block();
 
-    return std::make_unique<ForNode>(ForNode(bind_var, std::move(iterator), std::move(block)));
+    return std::make_unique<ForNode>(bind_var, std::move(iterator), std::move(block));
+}
+
+std::unique_ptr<StmtNode> Parser::parse_if() {
+    std::vector<ConditionBlock> branches;
+
+    consume(TokenKind::If);
+
+    auto cond = parse_expression();
+    auto block = parse_block();
+    branches.emplace_back(std::move(cond), std::move(block));
+
+    while (match(TokenKind::Else)) {
+        if (peek().kind == TokenKind::If) {
+            advance();  // Consume 'if'
+            auto branch_cond = parse_expression();
+            auto branch_block = parse_block();
+            branches.emplace_back(std::move(branch_cond), std::move(branch_block));
+            continue;
+        }
+        std::unique_ptr<ExprNode> branch_cond = nullptr;    // Indicates this is an else block
+        auto branch_block = parse_block();
+        branches.emplace_back(std::move(branch_cond), std::move(branch_block));
+        break;
+    }
+
+    return std::make_unique<IfNode>(std::move(branches));
+}
+
+std::unique_ptr<StmtNode> Parser::parse_while() {
+    consume(TokenKind::While);
+    auto cond = parse_expression();
+    auto block = parse_block();
+
+    return std::make_unique<WhileNode>(std::move(cond), std::move(block));
 }
 
 std::unique_ptr<ExprNode> Parser::parse_expression(int prec) {
@@ -192,7 +239,13 @@ std::unique_ptr<ExprNode> Parser::parse_fncall(Token id) {
         }
     }
     consume(TokenKind::RightParen);
-    return std::make_unique<FuncCallNode>(FuncCallNode(id, std::move(args)));
+    return std::make_unique<FuncCallNode>(id, std::move(args));
+}
+
+std::unique_ptr<StmtNode> Parser::parse_expr_stmt() {
+    auto expr = parse_expression();
+    consume(TokenKind::SemiColon);
+    return std::make_unique<ExprStmt>(std::move(expr));
 }
 
 std::unique_ptr<ExprNode> Parser::nud(Token token) {
@@ -213,6 +266,17 @@ std::unique_ptr<ExprNode> Parser::nud(Token token) {
                 return fncall;
             }
             return std::make_unique<IdentifierNode>(IdentifierNode(id));
+        }
+        case TokenKind::True:
+        case TokenKind::False:
+            advance();
+            return std::make_unique<BooleanLiteral>(token);
+        case TokenKind::Not:
+        case TokenKind::Minus: {
+            advance();
+            int unary_prec = 100;
+            auto right = parse_expression(100);
+            return std::make_unique<UnaryNode>(std::move(right));
         }
         default:
             throw SyntaxError("Expected an expression");

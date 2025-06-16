@@ -35,9 +35,9 @@ private:
     std::unique_ptr<StmtNode> parse_return();
     std::unique_ptr<StmtNode> parse_for();
 
-    // TODO: NOT YET IMPLEMENTED!!
     std::unique_ptr<StmtNode> parse_if();
     std::unique_ptr<StmtNode> parse_while();
+    std::unique_ptr<StmtNode> parse_expr_stmt();
 
     // Expressions
     std::unique_ptr<ExprNode> parse_expression(int prec = 0);

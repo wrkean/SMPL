@@ -30,11 +30,13 @@ enum class TokenKind {
     EqualEqual,
     ForSlash,
     ForSlashEqual,
+    Not,
 
     Identifier,
     NumLiteral,
     StringLiteral,
     CharLiteral,
+    True, False,
 
     Eof,
 };
