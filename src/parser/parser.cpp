@@ -70,9 +70,7 @@ std::unique_ptr<StmtNode> Parser::parse_fndecl() {
     consume(TokenKind::Defn);
     Token identifier = consume(TokenKind::Identifier);
 
-    consume(TokenKind::LeftParen);
     auto params = parse_params();
-    consume(TokenKind::RightParen);
 
     // Get return type
     std::optional<Token> return_type;
@@ -83,31 +81,33 @@ std::unique_ptr<StmtNode> Parser::parse_fndecl() {
         Smpl::error(peek().line, "Expected '{' or '->'");
     }
 
-    consume(TokenKind::LeftBrace);
     auto block = parse_block();
-    consume(TokenKind::RightBrace);
-
     return std::make_unique<DefnNode>(DefnNode(identifier, std::move(params), return_type, std::move(block)));
 }
 
 std::unique_ptr<StmtNode> Parser::parse_block() {
+    consume(TokenKind::LeftBrace);
     std::vector<std::unique_ptr<StmtNode>> statements;
 
     while (peek().kind != TokenKind::RightBrace) {
         statements.push_back(std::move(parse_statement()));
     }
-
+    consume(TokenKind::RightBrace);
     return std::make_unique<BlockNode>(BlockNode(std::move(statements)));
 }
 
 std::unique_ptr<StmtNode> Parser::parse_params() {
+    consume(TokenKind::LeftParen);
     std::vector<std::pair<Token, Token>> params;
+
     while (peek().kind != TokenKind::RightParen) {
         if (peek().kind == TokenKind::Identifier) {
             Token param_id = advance();
             consume(TokenKind::Colon);
+
             Token param_type = consume(TokenKind::Identifier);
             params.emplace_back(param_id, param_type);
+
             if (peek().kind == TokenKind::Comma) {
                 advance();
             } else if (peek().kind != TokenKind::RightParen) {
@@ -116,7 +116,7 @@ std::unique_ptr<StmtNode> Parser::parse_params() {
             }
         }
     }
-
+    consume(TokenKind::RightParen);
     return std::make_unique<ParamNode>(ParamNode(params));
 }
 
@@ -147,9 +147,7 @@ std::unique_ptr<StmtNode> Parser::parse_for() {
     Token bind_var = consume(TokenKind::Identifier);
     consume(TokenKind::In);
     auto iterator = parse_expression();
-    consume(TokenKind::LeftBrace);
     auto block = parse_block();
-    consume(TokenKind::RightBrace);
 
     return std::make_unique<ForNode>(ForNode(bind_var, std::move(iterator), std::move(block)));
 }
