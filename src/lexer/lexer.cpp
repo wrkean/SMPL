@@ -76,6 +76,11 @@ void Lexer::lex_token() {
         case '/':
             if (match('=')) {
                 add_token(TokenKind::ForSlashEqual);
+            } else if (match('/')) {
+                // Ignore comments
+                while (!at_end() && peek() != '\n') {
+                    advance();
+                }
             } else {
                 add_token(TokenKind::ForSlash);
             }
