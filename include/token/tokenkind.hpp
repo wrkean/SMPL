@@ -35,6 +35,7 @@ enum class TokenKind {
     NumLiteral,
     StringLiteral,
     CharLiteral,
+    True, False,
 
     Eof,
 };

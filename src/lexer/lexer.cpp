@@ -18,6 +18,8 @@ Lexer::Lexer(const std::string&& source)
     keywords.emplace("for", TokenKind::For);
     keywords.emplace("if", TokenKind::If);
     keywords.emplace("while", TokenKind::While);
+    keywords.emplace("true", TokenKind::True);
+    keywords.emplace("false", TokenKind::False);
 }
 
 std::vector<Token>& Lexer::lex() {

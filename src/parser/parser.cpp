@@ -1,5 +1,6 @@
 #include "parser/parser.hpp"
 #include "ast/expr/binary.hpp"
+#include "ast/expr/boolean_literal.hpp"
 #include "ast/expr/expr.hpp"
 #include "ast/expr/fncall.hpp"
 #include "ast/expr/grouping.hpp"
@@ -119,21 +120,19 @@ std::unique_ptr<StmtNode> Parser::parse_params() {
     consume(TokenKind::LeftParen);
     std::vector<std::pair<Token, Token>> params;
 
-    if (peek().kind != TokenKind::RightParen) {
-        while (true) {
-            Token param_id = consume(TokenKind::Identifier);
-            consume(TokenKind::Colon);
-            Token param_type = consume(TokenKind::Identifier);
-            params.emplace_back(param_id, param_type);
+    while (peek().kind != TokenKind::RightParen) {
+        Token param_id = consume(TokenKind::Identifier);
+        consume(TokenKind::Colon);
 
-            if (peek().kind == TokenKind::Comma) {
-                advance();
-            } else {
-                break;
-            }
+        Token param_type = consume(TokenKind::Identifier);
+        params.emplace_back(param_id, param_type);
+
+        if (peek().kind == TokenKind::Comma) {
+            advance();
+        } else if (peek().kind != TokenKind::RightParen) {
+            throw SyntaxError("Expected ')' or ','");
         }
     }
-
     consume(TokenKind::RightParen);
     return std::make_unique<ParamNode>(params);
 }
@@ -241,7 +240,7 @@ std::unique_ptr<ExprNode> Parser::nud(Token token) {
             advance();  // Consume '('
             auto expr = parse_expression();
             consume(TokenKind::RightParen);
-            return std::make_unique<GroupingExpr>(std::move(expr));
+            return std::make_unique<GroupingExpr>(GroupingExpr(std::move(expr)));
         }
         case TokenKind::Identifier: {
             Token id = advance();
@@ -249,8 +248,12 @@ std::unique_ptr<ExprNode> Parser::nud(Token token) {
                 auto fncall = parse_fncall(id);
                 return fncall;
             }
-            return std::make_unique<IdentifierNode>(id);
+            return std::make_unique<IdentifierNode>(IdentifierNode(id));
         }
+        case TokenKind::True:
+        case TokenKind::False:
+            advance();
+            return std::make_unique<BooleanLiteral>(token);
         default:
             throw SyntaxError("Expected an expression");
     }
