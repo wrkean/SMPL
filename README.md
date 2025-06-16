@@ -49,6 +49,8 @@ defn main() {
     - assignment statements
     - expression statements
     - unary expression (only `not` `<expr>` and -`<expr>`)
+    - binary expression
+    - function calls
 - ❌ Type inference(?)
 - ❌ OOP
 - ❌ Composite types (arrays, class, hashmaps, etc.)
