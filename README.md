@@ -17,28 +17,43 @@ SMPL aims to be as simple as possible, much like C but with more type-safety and
 // two parameters of type i32, and should also return
 // a value of type i32
 defn pow(base: i32, exp: i32) -> i32 {
-    // Range-based for loop
     let result: i32 = 1;
+
+    // Range-based for loop
     for i in 0..exp {
-        result *= base;
     }
 
     return result;
 }
 
-// Entry function `main`
 defn main() {
-    // Assigns x to 12 as type i32 (signed 32-bit integer)
     let x: i32 = 12;
     let y: i32 = 14;
-    let z: i32 = x + y;
+    let z: i32 = pow(x, y);
 
-    let w: i32 = pow(z, 2);
+    // While loop
+    while true {
+        let some: i32 = true;
+    }
+
+    // Expression statements
+    x;
+    true;
+    pow(x, y);
+    not true;
 }
 ```
 # Progress
 - 🟡 Lexical analysis is partially done. The compiler for now will output the lexeme and its token kind representation.
-- 🟡 Only able to parse simple literal arithmetic expressions with grouping for now (e.g. 4 * (3 + 2))
+- Parser can now parse:
+    - if statements
+    - while statements
+    - for statements
+    - return statements
+    - function definitions
+    - assignment statements
+    - expression statements
+    - unary expression (only `not` `<expr>` and -`<expr>`)
 - ❌ Type inference(?)
 - ❌ OOP
 - ❌ Composite types (arrays, class, hashmaps, etc.)
