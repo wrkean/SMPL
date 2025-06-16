@@ -1,4 +1,5 @@
 #include "lexer/lexer.hpp"
+#include "error_reporter/compiler_err.hpp"
 #include "token/tokenkind.hpp"
 #include "smpl.hpp"
 #include <format>
@@ -15,6 +16,8 @@ Lexer::Lexer(const std::string&& source)
     keywords.emplace("return", TokenKind::Return);
     keywords.emplace("in", TokenKind::In);
     keywords.emplace("for", TokenKind::For);
+    keywords.emplace("if", TokenKind::If);
+    keywords.emplace("while", TokenKind::While);
 }
 
 std::vector<Token>& Lexer::lex() {
@@ -101,8 +104,8 @@ void Lexer::lex_token() {
             } else if (isdigit(ch)) {
                 lex_number();
             } else {
-                std::string msg = std::format("Unexpected character: {}", ch);
-                Smpl::error(line, msg);
+                std::string msg = std::format("[{}]: Unexpected character: {}", line, ch);
+                throw LexicalError(msg);
             }
             break;
     }
@@ -123,7 +126,7 @@ void Lexer::lex_string() {
     }
 
     if (at_end() || peek() == '\n') {
-        std::runtime_error("Unterminated string literal");
+        throw LexicalError(std::format("[{}]: Unterminated string literal", line));
     }
 
     std::string lexeme = source.substr(start + 1, current - start - 1);

@@ -12,14 +12,16 @@
 #include "ast/stmt/param.hpp"
 #include "ast/stmt/return.hpp"
 #include "ast/stmt/stmt.hpp"
+#include "error_reporter/compiler_err.hpp"
 #include "smpl.hpp"
 #include "token/token.hpp"
 #include "token/tokenkind.hpp"
 #include <format>
 #include <iostream>
+#include <magic_enum/magic_enum.hpp>
 #include <memory>
 #include <optional>
-#include <stdexcept>
+#include <sstream>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -43,15 +45,21 @@ std::vector<std::unique_ptr<StmtNode>> Parser::parse() {
     std::vector<std::unique_ptr<StmtNode>> statements;
 
     while (!at_end()) {
-        statements.push_back(std::move(parse_statement()));
+        try {
+            auto stmt = parse_statement();
+            if (stmt) statements.push_back(std::move(stmt));
+        } catch (const CompilerError& err) {
+            Smpl::error(peek().line, err.what());
+            synchronize();
+        }
     }
 
     return statements;
 }
 
 std::unique_ptr<StmtNode> Parser::parse_statement() {
-    std::cout << "Current token: " << peek().lexeme << "\n";
     switch (peek().kind) {
+        // TODO: Parse more statements
         case TokenKind::Defn:
             return parse_fndecl();
         case TokenKind::Let:
@@ -60,13 +68,13 @@ std::unique_ptr<StmtNode> Parser::parse_statement() {
             return parse_return();
         case TokenKind::For:
             return parse_for();
-        case TokenKind::If:
-            return parse_if();
-        case TokenKind::While:
-            return parse_while();
-        // TODO: Parse more statements
+        // TODO: Implement
+        // case TokenKind::If:
+        //     return parse_if();
+        // case TokenKind::While:
+        //     return parse_while();
         default:
-            Smpl::error(peek().line, std::format("Unexpected token: {}", peek().lexeme));
+            throw SyntaxError(std::format("Unexpected token: {}", peek().lexeme));
     }
 }
 
@@ -82,7 +90,7 @@ std::unique_ptr<StmtNode> Parser::parse_fndecl() {
         advance();      // Consume '->'
         return_type = consume(TokenKind::Identifier);
     } else if (peek().kind != TokenKind::LeftBrace) {
-        Smpl::error(peek().line, "Expected '{' or '->'");
+        throw SyntaxError("Expected block{} or '->'");
     }
 
     auto block = parse_block();
@@ -94,7 +102,13 @@ std::unique_ptr<StmtNode> Parser::parse_block() {
     std::vector<std::unique_ptr<StmtNode>> statements;
 
     while (peek().kind != TokenKind::RightBrace) {
-        statements.push_back(std::move(parse_statement()));
+        try {
+            auto stmt = parse_statement();
+            if (stmt) statements.push_back(std::move(stmt));
+        } catch (const CompilerError& err) {
+            Smpl::error(peek().line, err.what());
+            synchronize();
+        }
     }
     consume(TokenKind::RightBrace);
     return std::make_unique<BlockNode>(BlockNode(std::move(statements)));
@@ -105,19 +119,16 @@ std::unique_ptr<StmtNode> Parser::parse_params() {
     std::vector<std::pair<Token, Token>> params;
 
     while (peek().kind != TokenKind::RightParen) {
-        if (peek().kind == TokenKind::Identifier) {
-            Token param_id = advance();
-            consume(TokenKind::Colon);
+        Token param_id = consume(TokenKind::Identifier);
+        consume(TokenKind::Colon);
 
-            Token param_type = consume(TokenKind::Identifier);
-            params.emplace_back(param_id, param_type);
+        Token param_type = consume(TokenKind::Identifier);
+        params.emplace_back(param_id, param_type);
 
-            if (peek().kind == TokenKind::Comma) {
-                advance();
-            } else if (peek().kind != TokenKind::RightParen) {
-                // FIXME: Handle errors gracefully
-                throw std::runtime_error("Expected ')' or ','");
-            }
+        if (peek().kind == TokenKind::Comma) {
+            advance();
+        } else if (peek().kind != TokenKind::RightParen) {
+            throw SyntaxError("Expected ')' or ','");
         }
     }
     consume(TokenKind::RightParen);
@@ -177,8 +188,7 @@ std::unique_ptr<ExprNode> Parser::parse_fncall(Token id) {
         if (peek().kind == TokenKind::Comma) {
             advance();
         } else if (peek().kind != TokenKind::RightParen) {
-            // FIXME: Handle errors gracefully
-            throw std::runtime_error("Expected ')' or ','");
+            throw SyntaxError("Expexted ')' or ','");
         }
     }
     consume(TokenKind::RightParen);
@@ -193,10 +203,7 @@ std::unique_ptr<ExprNode> Parser::nud(Token token) {
         case TokenKind::LeftParen: {
             advance();  // Consume '('
             auto expr = parse_expression();
-            if (peek().kind != TokenKind::RightParen) {
-                Smpl::error(peek().line, "Expected ')'");
-            }
-            advance();  // Consume ')'
+            consume(TokenKind::RightParen);
             return std::make_unique<GroupingExpr>(GroupingExpr(std::move(expr)));
         }
         case TokenKind::Identifier: {
@@ -208,9 +215,7 @@ std::unique_ptr<ExprNode> Parser::nud(Token token) {
             return std::make_unique<IdentifierNode>(IdentifierNode(id));
         }
         default:
-            Smpl::error(peek().line, std::format("Current token: {}", peek().lexeme));
-            // TODO: Error just for debugging, change later
-            throw std::runtime_error("Expected expression");
+            throw SyntaxError("Expected an expression");
     }
 }
 
@@ -252,15 +257,23 @@ int Parser::get_precedence(Token op) {
 }
 
 Assoc Parser::get_associativity(Token op) {
-    auto op_info = operator_table.at(op.kind);
-    return op_info.associativity;
+    if (operator_table.contains(op.kind)) {
+        auto op_info = operator_table.at(op.kind);
+        return op_info.associativity;
+    }
+
+    throw SyntaxError(std::format("Unexpected operator '{}' in expression", op.lexeme));
 }
 
 Token Parser::consume(TokenKind expected) {
     if (expected == peek().kind) return advance();
 
-    Smpl::error(peek().line, std::format("Unexpected token: {}", peek().lexeme));
-    throw std::runtime_error("Unexpected token");
+    std::ostringstream oss;
+    std::ostringstream oss2;
+    oss << magic_enum::enum_name(peek().kind);
+    oss2 << magic_enum::enum_name(expected);
+
+    throw SyntaxError(std::format("Unexpected token <{}>, expected <{}>.", oss.str(), oss2.str()));
 }
 
 Token Parser::advance() {
