@@ -16,6 +16,7 @@
 #include "ast/stmt/param.hpp"
 #include "ast/stmt/return.hpp"
 #include "ast/stmt/stmt.hpp"
+#include "ast/stmt/unary.hpp"
 #include "ast/stmt/while.hpp"
 #include "error_reporter/compiler_err.hpp"
 #include "smpl.hpp"
@@ -30,6 +31,7 @@
 #include <utility>
 #include <vector>
 
+// For infix operators
 static std::unordered_map<TokenKind, OperatorInfo> operator_table = {
     {TokenKind::Equal,     {1, Assoc::Right}}, // assignment
     // {TokenKind::Or,        {2, Assoc::Left}},
@@ -267,6 +269,13 @@ std::unique_ptr<ExprNode> Parser::nud(Token token) {
         case TokenKind::False:
             advance();
             return std::make_unique<BooleanLiteral>(token);
+        case TokenKind::Not:
+        case TokenKind::Minus: {
+            advance();
+            int unary_prec = 100;
+            auto right = parse_expression(100);
+            return std::make_unique<UnaryNode>(std::move(right));
+        }
         default:
             throw SyntaxError("Expected an expression");
     }

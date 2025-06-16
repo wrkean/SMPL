@@ -19,6 +19,7 @@ Lexer::Lexer(const std::string&& source)
     keywords.emplace("while", TokenKind::While);
     keywords.emplace("true", TokenKind::True);
     keywords.emplace("false", TokenKind::False);
+    keywords.emplace("not", TokenKind::Not);
 }
 
 std::vector<Token>& Lexer::lex() {
