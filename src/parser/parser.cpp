@@ -83,6 +83,8 @@ std::unique_ptr<StmtNode> Parser::parse_statement() {
         case TokenKind::True:
         case TokenKind::False:
         case TokenKind::LeftParen:
+        case TokenKind::Not:
+        case TokenKind::Minus:
             return parse_expr_stmt();
         default:
             throw SyntaxError(std::format("Unexpected token: {}", peek().lexeme));
