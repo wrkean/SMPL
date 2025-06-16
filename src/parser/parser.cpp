@@ -9,6 +9,7 @@
 #include "ast/stmt/assignment.hpp"
 #include "ast/stmt/block.hpp"
 #include "ast/stmt/condition_block.hpp"
+#include "ast/stmt/expr_stmt.hpp"
 #include "ast/stmt/fndecl.hpp"
 #include "ast/stmt/for.hpp"
 #include "ast/stmt/if.hpp"
@@ -75,6 +76,12 @@ std::unique_ptr<StmtNode> Parser::parse_statement() {
             return parse_if();
         case TokenKind::While:
             return parse_while();
+        case TokenKind::Identifier:
+        case TokenKind::NumLiteral:
+        case TokenKind::True:
+        case TokenKind::False:
+        case TokenKind::LeftParen:
+            return parse_expr_stmt();
         default:
             throw SyntaxError(std::format("Unexpected token: {}", peek().lexeme));
     }
@@ -229,6 +236,12 @@ std::unique_ptr<ExprNode> Parser::parse_fncall(Token id) {
     }
     consume(TokenKind::RightParen);
     return std::make_unique<FuncCallNode>(id, std::move(args));
+}
+
+std::unique_ptr<StmtNode> Parser::parse_expr_stmt() {
+    auto expr = parse_expression();
+    consume(TokenKind::SemiColon);
+    return std::make_unique<ExprStmt>(std::move(expr));
 }
 
 std::unique_ptr<ExprNode> Parser::nud(Token token) {

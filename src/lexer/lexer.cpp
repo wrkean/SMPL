@@ -1,9 +1,7 @@
 #include "lexer/lexer.hpp"
 #include "error_reporter/compiler_err.hpp"
 #include "token/tokenkind.hpp"
-#include "smpl.hpp"
 #include <format>
-#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -17,6 +15,7 @@ Lexer::Lexer(const std::string&& source)
     keywords.emplace("in", TokenKind::In);
     keywords.emplace("for", TokenKind::For);
     keywords.emplace("if", TokenKind::If);
+    keywords.emplace("else", TokenKind::Else);
     keywords.emplace("while", TokenKind::While);
     keywords.emplace("true", TokenKind::True);
     keywords.emplace("false", TokenKind::False);
