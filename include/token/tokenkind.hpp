@@ -7,6 +7,9 @@ enum class TokenKind {
     For,
     Return,
     In,
+    If,
+    Else,
+    While,
 
     LeftParen,
     RightParen,

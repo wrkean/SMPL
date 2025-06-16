@@ -35,18 +35,24 @@ private:
     std::unique_ptr<StmtNode> parse_return();
     std::unique_ptr<StmtNode> parse_for();
 
+    // TODO: NOT YET IMPLEMENTED!!
+    std::unique_ptr<StmtNode> parse_if();
+    std::unique_ptr<StmtNode> parse_while();
+
     // Expressions
     std::unique_ptr<ExprNode> parse_expression(int prec = 0);
     std::unique_ptr<ExprNode> parse_fncall(Token id);
-    std::unique_ptr<ExprNode> nud(Token token);
-    std::unique_ptr<ExprNode> led(Token op, std::unique_ptr<ExprNode> left);
 
     // Helper methods
+    std::unique_ptr<ExprNode> nud(Token token);
+    std::unique_ptr<ExprNode> led(Token op, std::unique_ptr<ExprNode> left);
+    void synchronize();
     int get_precedence(Token op);
     Assoc get_associativity(Token op);
     Token consume(TokenKind expected);
     Token advance();
     Token peek() const;
+    Token previous() const;
     bool match(TokenKind kind);
     bool at_end() const;
 };

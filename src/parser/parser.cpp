@@ -60,6 +60,10 @@ std::unique_ptr<StmtNode> Parser::parse_statement() {
             return parse_return();
         case TokenKind::For:
             return parse_for();
+        case TokenKind::If:
+            return parse_if();
+        case TokenKind::While:
+            return parse_while();
         // TODO: Parse more statements
         default:
             Smpl::error(peek().line, std::format("Unexpected token: {}", peek().lexeme));
@@ -219,6 +223,26 @@ std::unique_ptr<ExprNode> Parser::led(Token op, std::unique_ptr<ExprNode> left) 
     return std::make_unique<BinaryExpr>(BinaryExpr(op, std::move(left), std::move(right)));
 }
 
+void Parser::synchronize() {
+    advance();  // Consume erroneous token
+
+    while (!at_end()) {
+        if (previous().kind == TokenKind::SemiColon) return;
+
+        switch (peek().kind) {
+            case TokenKind::Defn:
+            case TokenKind::Let:
+            case TokenKind::Return:
+            case TokenKind::If:
+            case TokenKind::While:
+                return;
+            default:    // Only cancels warning (Unhandled enum values)
+        }
+
+        advance();
+    }
+}
+
 int Parser::get_precedence(Token op) {
     if (operator_table.contains(op.kind)) {
         auto op_info = operator_table.at(op.kind);
@@ -246,6 +270,10 @@ Token Parser::advance() {
 
 Token Parser::peek() const {
     return tokens[current];
+}
+
+Token Parser::previous() const {
+    return tokens[current - 1];
 }
 
 bool Parser::match(TokenKind kind) {
