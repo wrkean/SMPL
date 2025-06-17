@@ -16,6 +16,7 @@ defn pow(base: i32, exp: i32) -> i32 {
 
     // Range-based for loop
     for i in 0..exp {
+        result *= base;
     }
 
     return result;
@@ -23,7 +24,7 @@ defn pow(base: i32, exp: i32) -> i32 {
 
 defn main() {
     let x: i32 = 12;
-    let y: i32 = 14;
+    let y: i32 = x = 64;
     let z: i32 = pow(x, y);
 
     // While loop
@@ -31,7 +32,11 @@ defn main() {
         let some: i32 = true;
     }
 
-    // Expression statements
+    if false == not true {
+
+    }
+
+    // Expression statement
     x;
     true;
     pow(x, y);
