@@ -25,26 +25,26 @@ defn pow(base: i32, exp: i32) -> i32 {
 defn main() {
     let x: i32 = 12;
     let y: i32 = x = 64;
-    let z: i32 = pow(x, y);
+    let z: i32 = pow(x, y);  // FIXME: Overflow alert. But it's okay, we're not executing anything
 
     // While loop
     while true {
-        let some: i32 = true;
+        let some: i32 = true; // Nope. Won't compile. bool and i32 are not assignable
     }
 
     if false == not true {
-
+        // Should be true, this does not evaluate anything yet though
     }
 
     // Expression statement
     x;
     true;
     pow(x, y);
-    not true;
+    not true; // False
 }
 ```
 # Progress
-- 🟡 Lexical analysis is partially done. The compiler for now will output the lexeme and its token kind representation.
+- 🟢 Lexical analysis done (I think). It's just a matter of expanding now.
 - Parser can now parse:
     - if statements
     - while statements
@@ -56,9 +56,8 @@ defn main() {
     - unary expression (only `not` `<expr>` and -`<expr>`)
     - binary expression
     - function calls
-- ❌ Type inference(?)
-- ❌ OOP
-- ❌ Composite types (arrays, class, hashmaps, etc.)
+    - boolean expressions (including relational expressions)
+-❌ Semantic Analysis
 
 # Primitive Types
 An integer's name can be composed of its signedness and its bit-width. For example, i32 means it is a signed 32-bit integer and u32 means it is an unsigned 32-bit integer.
