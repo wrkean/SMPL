@@ -23,6 +23,7 @@
 #include "token/token.hpp"
 #include "token/tokenkind.hpp"
 #include <format>
+#include <initializer_list>
 #include <magic_enum/magic_enum.hpp>
 #include <memory>
 #include <optional>
@@ -33,15 +34,27 @@
 
 // For infix operators
 static std::unordered_map<TokenKind, OperatorInfo> operator_table = {
-    {TokenKind::Equal,     {1, Assoc::Right}}, // assignment
-    // {TokenKind::Or,        {2, Assoc::Left}},
-    // {TokenKind::And,       {3, Assoc::Left}},
-    {TokenKind::Range,     {5, Assoc::Left}},
-    {TokenKind::Plus,      {10, Assoc::Left}},
-    {TokenKind::Minus,     {10, Assoc::Left}},
-    {TokenKind::Star,      {20, Assoc::Left}},
-    {TokenKind::ForSlash,  {20, Assoc::Left}},
-    // {TokenKind::Power,     {30, Assoc::Right}}, // e.g. **
+    // Assignment operators. Lowest precedence, right-associative
+    {TokenKind::Equal,        {1, Assoc::Right}},
+    {TokenKind::PlusEqual,    {1, Assoc::Right}},
+    {TokenKind::MinusEqual,   {1, Assoc::Right}},
+    {TokenKind::StarEqual,    {1, Assoc::Right}},
+    {TokenKind::ForSlashEqual,{1, Assoc::Right}}, // If you support `/=`
+
+    // Logical and bitwise operators
+    // {TokenKind::Or,         {2, Assoc::Left}},
+    // {TokenKind::And,        {3, Assoc::Left}},
+
+    {TokenKind::Range,        {5, Assoc::Left}},
+
+    // Arithmetic
+    {TokenKind::Plus,         {10, Assoc::Left}},
+    {TokenKind::Minus,        {10, Assoc::Left}},
+    {TokenKind::Star,         {20, Assoc::Left}},
+    {TokenKind::ForSlash,     {20, Assoc::Left}},
+
+    // Power operator (right-associative)
+    // {TokenKind::Power,      {30, Assoc::Right}}, // e.g. **
 };
 
 Parser::Parser(const std::vector<Token>&& tokens)
@@ -156,7 +169,13 @@ std::unique_ptr<StmtNode> Parser::parse_assignment() {
     Token type = consume(TokenKind::Identifier);
 
     // TODO: Only handles equal operators! add more assignment operators like +=.
-    Token op = consume(TokenKind::Equal);
+    Token op = consume_any({
+        TokenKind::PlusEqual,
+        TokenKind::MinusEqual,
+        TokenKind::StarEqual,
+        TokenKind::ForSlashEqual,
+        TokenKind::Equal
+    }, "Expected assignment operator, found an unexpected token: " + peek().lexeme);
     auto right = parse_expression();
     consume(TokenKind::SemiColon);
 
@@ -338,6 +357,14 @@ Token Parser::consume(TokenKind expected) {
     oss2 << magic_enum::enum_name(expected);
 
     throw SyntaxError(std::format("Unexpected token <{}>, expected <{}>.", oss.str(), oss2.str()));
+}
+
+Token Parser::consume_any(std::initializer_list<TokenKind> expected_kinds, const std::string& err_msg) {
+    for (auto& kind : expected_kinds) {
+        if (kind == peek().kind) return advance();
+    }
+
+    throw SyntaxError(err_msg);
 }
 
 Token Parser::advance() {

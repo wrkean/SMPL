@@ -4,6 +4,7 @@
 #include "ast/stmt/stmt.hpp"
 #include "token/token.hpp"
 #include "token/tokenkind.hpp"
+#include <initializer_list>
 #include <memory>
 #include <vector>
 
@@ -50,6 +51,7 @@ private:
     int get_precedence(Token op);
     Assoc get_associativity(Token op);
     Token consume(TokenKind expected);
+    Token consume_any(std::initializer_list<TokenKind> expected_kinds, const std::string& err_msg);
     Token advance();
     Token peek() const;
     Token previous() const;
