@@ -11,5 +11,6 @@ void ParamNode::print() const {
         std::cout << param.first.lexeme;
         std::cout << " ";
         std::cout << param.second.lexeme;
+        std::cout << " ";
     }
 }

@@ -6,6 +6,7 @@ DefnNode::DefnNode(Token identifier, std::unique_ptr<StmtNode> params, std::opti
 
 void DefnNode::print() const {
     std::cout << "Function name: " << identifier.lexeme << "\n";
+    std::cout << "Params: ";
     params->print();
     std::cout << "\n";
     std::cout << "Return type: ";
