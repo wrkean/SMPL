@@ -6,6 +6,7 @@
 #include "ast/expr/grouping.hpp"
 #include "ast/expr/identifier.hpp"
 #include "ast/expr/num_literal.hpp"
+#include "ast/expr/unary.hpp"
 #include "ast/stmt/assignment.hpp"
 #include "ast/stmt/block.hpp"
 #include "ast/stmt/condition_block.hpp"
@@ -16,7 +17,6 @@
 #include "ast/stmt/param.hpp"
 #include "ast/stmt/return.hpp"
 #include "ast/stmt/stmt.hpp"
-#include "ast/stmt/unary.hpp"
 #include "ast/stmt/while.hpp"
 #include "error_reporter/compiler_err.hpp"
 #include "smpl.hpp"
@@ -34,27 +34,57 @@
 
 // For infix operators
 static std::unordered_map<TokenKind, OperatorInfo> operator_table = {
-    // Assignment operators. Lowest precedence, right-associative
-    {TokenKind::Equal,        {1, Assoc::Right}},
-    {TokenKind::PlusEqual,    {1, Assoc::Right}},
-    {TokenKind::MinusEqual,   {1, Assoc::Right}},
-    {TokenKind::StarEqual,    {1, Assoc::Right}},
-    {TokenKind::ForSlashEqual,{1, Assoc::Right}}, // If you support `/=`
+    // Precedence 1: Assignment (right-to-left)
+    {TokenKind::Equal,                  {1, Assoc::Right}},
+    {TokenKind::PlusEqual,              {1, Assoc::Right}},
+    {TokenKind::MinusEqual,             {1, Assoc::Right}},
+    {TokenKind::StarEqual,              {1, Assoc::Right}},
+    {TokenKind::ForSlashEqual,          {1, Assoc::Right}},
+    {TokenKind::PercentEqual,           {1, Assoc::Right}},
+    {TokenKind::AmperEqual,             {1, Assoc::Right}},
+    {TokenKind::CaretEqual,             {1, Assoc::Right}},
+    {TokenKind::PipeEqual,              {1, Assoc::Right}},
+    {TokenKind::LesserLesserEqual,      {1, Assoc::Right}},
+    {TokenKind::GreaterGreaterEqual,   {1, Assoc::Right}},
 
-    // Logical and bitwise operators
-    // {TokenKind::Or,         {2, Assoc::Left}},
-    // {TokenKind::And,        {3, Assoc::Left}},
+    // Precedence 2: Logical OR
+    {TokenKind::Or,                    {2, Assoc::Left}},
 
-    {TokenKind::Range,        {5, Assoc::Left}},
+    // Precedence 3: Logical AND
+    {TokenKind::And,                   {3, Assoc::Left}},
 
-    // Arithmetic
-    {TokenKind::Plus,         {10, Assoc::Left}},
-    {TokenKind::Minus,        {10, Assoc::Left}},
-    {TokenKind::Star,         {20, Assoc::Left}},
-    {TokenKind::ForSlash,     {20, Assoc::Left}},
+    // Precedence 4: Bitwise OR
+    {TokenKind::Pipe,                  {4, Assoc::Left}},
 
-    // Power operator (right-associative)
-    // {TokenKind::Power,      {30, Assoc::Right}}, // e.g. **
+    // Precedence 5: Bitwise XOR
+    {TokenKind::Caret,                 {5, Assoc::Left}},
+
+    // Precedence 6: Bitwise AND
+    {TokenKind::Ampersand,             {6, Assoc::Left}},
+
+    // Precedence 7: Equality
+    {TokenKind::EqualEqual,            {7, Assoc::Left}},
+    {TokenKind::NotEqual,              {7, Assoc::Left}},
+
+    // Precedence 8: Relational
+    {TokenKind::LesserThan,            {8, Assoc::Left}},
+    {TokenKind::LesserEqual,           {8, Assoc::Left}},
+    {TokenKind::GreaterThan,           {8, Assoc::Left}},
+    {TokenKind::GreaterEqual,          {8, Assoc::Left}},
+
+    // Precedence 9: Shift and Range '..' operator
+    {TokenKind::LesserLesser,          {9, Assoc::Left}},
+    {TokenKind::GreaterGreater,        {9, Assoc::Left}},
+    {TokenKind::Range,                 {9, Assoc::Left}},
+
+    // Precedence 10: Additive
+    {TokenKind::Plus,                  {10, Assoc::Left}},
+    {TokenKind::Minus,                 {10, Assoc::Left}},
+
+    // Precedence 11: Multiplicative
+    {TokenKind::Star,                  {11, Assoc::Left}},
+    {TokenKind::ForSlash,              {11, Assoc::Left}},
+    {TokenKind::Percent,               {11, Assoc::Left}},
 };
 
 Parser::Parser(const std::vector<Token>&& tokens)
@@ -292,10 +322,10 @@ std::unique_ptr<ExprNode> Parser::nud(Token token) {
             return std::make_unique<BooleanLiteral>(token);
         case TokenKind::Not:
         case TokenKind::Minus: {
-            advance();
+            Token op = advance();
             int unary_prec = 100;
             auto right = parse_expression(100);
-            return std::make_unique<UnaryNode>(std::move(right));
+            return std::make_unique<UnaryNode>(op, std::move(right));
         }
         default:
             throw SyntaxError("Expected an expression");
