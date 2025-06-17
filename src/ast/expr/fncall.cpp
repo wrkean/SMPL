@@ -5,10 +5,12 @@ FuncCallNode::FuncCallNode(Token identifier, std::vector<std::unique_ptr<ExprNod
     : identifier(identifier), args(std::move(args)) { }
 
 void FuncCallNode::print() const {
+    std::cout << "Function call\n";
     std::cout << "Identifier: " << identifier.lexeme << "\n";
     std::cout << "Args: ";
     for (auto& arg : args) {
         arg->print();
-        std::cout << "\n";
+        std::cout << " ";
     }
+    std::cout << "\nEnd function call";
 }

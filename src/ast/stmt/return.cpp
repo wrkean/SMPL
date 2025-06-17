@@ -8,5 +8,4 @@ ReturnNode::ReturnNode(std::unique_ptr<ExprNode> return_expr)
 void ReturnNode::print() const {
     std::cout << "Return: ";
     return_expr->print();
-    std::cout << "\n";
 }

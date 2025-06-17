@@ -12,5 +12,5 @@ void DefnNode::print() const {
     std::cout << "Return type: ";
     std::cout << (return_type.has_value() ? return_type.value().lexeme : "") << "\n";
     block->print();
-    std::cout << "\n";
+    std::cout << "End " << identifier.lexeme << "\n";
 }

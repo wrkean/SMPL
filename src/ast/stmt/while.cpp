@@ -5,9 +5,11 @@ WhileNode::WhileNode(std::unique_ptr<ExprNode> condition, std::unique_ptr<StmtNo
     :  condition(std::move(condition)), block(std::move(block)) { }
 
 void WhileNode::print() const {
+    std::cout << "While loop\n";
     std::cout << "Condition: ";
     condition->print();
     std::cout << "\n";
     std::cout << "Block: ";
     block->print();
+    std::cout << "End while loop";
 }
