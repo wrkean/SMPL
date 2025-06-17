@@ -29,7 +29,8 @@ defn main() {
 
     // While loop
     while true {
-        let some: i32 = true; // Nope. Won't compile. bool and i32 are not assignable
+        let some: i32 = true; // Nope. Won't compile. bool and i32 are not assignable. Unless you typecast with the `as` operator, shown below
+        let boot_to_i32: i32 = true as i32; // Should evaluate to 1
     }
 
     if false == not true {
