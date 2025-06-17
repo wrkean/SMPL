@@ -20,6 +20,8 @@ Lexer::Lexer(const std::string&& source)
     keywords.emplace("true", TokenKind::True);
     keywords.emplace("false", TokenKind::False);
     keywords.emplace("not", TokenKind::Not);
+    keywords.emplace("and", TokenKind::And);
+    keywords.emplace("or", TokenKind::Or);
 }
 
 std::vector<Token>& Lexer::lex() {
@@ -90,6 +92,78 @@ void Lexer::lex_token() {
                 add_token(TokenKind::Range);
             } else {
                 // TODO: Add dot token
+            }
+            break;
+        case '%':
+            if (match('=')) {
+                add_token(TokenKind::PercentEqual);
+            } else {
+                add_token(TokenKind::Percent);
+            }
+            break;
+        case '>':
+            if (match('=')) {
+                add_token(TokenKind::GreaterEqual);
+            } else if (match('>')) {
+                if (match('=')) {
+                    add_token(TokenKind::GreaterGreaterEqual);
+                } else {
+                    add_token(TokenKind::GreaterGreater);
+                }
+            } else {
+                add_token(TokenKind::GreaterThan);
+            }
+            break;
+        case '<':
+            if (match('=')) {
+                add_token(TokenKind::LesserEqual);
+            } else if (match('<')) {
+                if (match('=')) {
+                    add_token(TokenKind::LesserLesserEqual);
+                } else {
+                    add_token(TokenKind::LesserLesser);
+                }
+            } else {
+                add_token(TokenKind::LesserThan);
+            }
+            break;
+        case '!':
+            if (match('=')) {
+                add_token(TokenKind::NotEqual);
+            } else {
+                add_token(TokenKind::Not);
+            }
+            break;
+        case '&':
+            if (match('=')) {
+                add_token(TokenKind::AmperEqual);
+            } else if (match('&')) {
+                add_token(TokenKind::And);
+            } else {
+                add_token(TokenKind::Ampersand);
+            }
+            break;
+        case '|':
+            if (match('=')) {
+                add_token(TokenKind::PipeEqual);
+            } else if (match('|')) {
+                add_token(TokenKind::Or);
+            } else {
+                add_token(TokenKind::Pipe);
+            }
+            break;
+        case '^':
+            if (match('=')) {
+                add_token(TokenKind::CaretEqual);
+            } else {
+                add_token(TokenKind::Caret);
+            }
+            break;
+        case '~':
+            if (match('=')) {
+                add_token(TokenKind::TildeEqual);
+            } else {
+                add_token(TokenKind::Tilde);
             }
             break;
         // Lex string literals
