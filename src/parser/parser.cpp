@@ -72,10 +72,11 @@ static std::unordered_map<TokenKind, OperatorInfo> operator_table = {
     {TokenKind::GreaterThan,           {8, Assoc::Left}},
     {TokenKind::GreaterEqual,          {8, Assoc::Left}},
 
-    // Precedence 9: Shift and Range '..' operator
+    // Precedence 9: Bitshift, Range '..' operator, and the type cast 'as' operator
     {TokenKind::LesserLesser,          {9, Assoc::Left}},
     {TokenKind::GreaterGreater,        {9, Assoc::Left}},
     {TokenKind::Range,                 {9, Assoc::Left}},
+    {TokenKind::As,                    {9, Assoc::Left}},
 
     // Precedence 10: Additive
     {TokenKind::Plus,                  {10, Assoc::Left}},
