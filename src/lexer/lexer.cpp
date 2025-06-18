@@ -1,6 +1,7 @@
 #include "lexer/lexer.hpp"
 #include "error_reporter/compiler_err.hpp"
 #include "token/tokenkind.hpp"
+#include <cctype>
 #include <format>
 #include <string>
 #include <vector>
@@ -237,6 +238,12 @@ void Lexer::lex_number() {
     if (peek() == '.' && isdigit(peek_next())) {
         advance();  // Consume '.'
         while (!at_end() && (isdigit(peek()))) {
+            advance();
+        }
+    }
+
+    if (isalnum(peek())) {
+        while (!at_end() && isalnum(peek())) {
             advance();
         }
     }
