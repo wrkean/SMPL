@@ -27,8 +27,8 @@ static inline bool is_integer(SmplType t) {
     return (t >= SmplType::Int8 && t <= SmplType::Uint);
 }
 
+// NOTE: Should only be for integers (or floating-points?)
 static SmplType promote(SmplType a, SmplType b) {
-    if (a == SmplType::Unknown || b == SmplType::Unknown) return SmplType::Unknown;
     return ((static_cast<int>(a) > static_cast<int>(b)) ? a : b);
 }
 
@@ -44,7 +44,8 @@ static SmplType resolve_binary_type(TokenKind op, SmplType left_type, SmplType r
     // Relational operators
     if (op == TokenKind::EqualEqual
         || op == TokenKind::LesserEqual || op == TokenKind::LesserThan
-        || op == TokenKind::GreaterEqual || op == TokenKind::GreaterThan) {
+        || op == TokenKind::GreaterEqual || op == TokenKind::GreaterThan)
+    {
         if (left_type == right_type) return SmplType::Boolean;
         if (is_numeric(left_type) && is_numeric(right_type)) return SmplType::Boolean;
         throw TypeError("Invalid types for comparison");
@@ -52,8 +53,28 @@ static SmplType resolve_binary_type(TokenKind op, SmplType left_type, SmplType r
 
     if (op == TokenKind::As) return right_type; // Should be Unknown
     if (op == TokenKind::Range) {
-        if (is_integer(left_type) && is_integer(right_type)) return SmplType::Unknown;
+        if (is_integer(left_type) && is_integer(right_type)) return promote(left_type, right_type);
+        if (left_type == SmplType::Unknown || right_type == SmplType::Unknown) return SmplType::Unknown;
         throw TypeError("Operands in range '..' operator should be integers");
+    }
+
+    // Assignment operators
+    if (op == TokenKind::Equal
+        || op == TokenKind::PlusEqual
+        || op == TokenKind::MinusEqual
+        || op == TokenKind::StarEqual
+        || op == TokenKind::ForSlashEqual
+        || op == TokenKind::PercentEqual)
+    {
+        if (left_type == right_type) {
+            return left_type;
+        }
+
+        if (left_type == SmplType::Unknown || right_type == SmplType::Unknown) {
+            return SmplType::Unknown;
+        }
+
+        throw TypeError("Assignment operator '=' needs the operands to be of the same type. Consider type-casting the right hand side");
     }
 
     // Arithmetic operators

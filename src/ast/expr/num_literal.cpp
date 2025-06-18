@@ -3,6 +3,7 @@
 #include "smpl/types.hpp"
 #include "token/tokenkind.hpp"
 #include <iostream>
+#include <magic_enum/magic_enum.hpp>
 #include <utility>
 #include <vector>
 
@@ -13,7 +14,7 @@ NumLitNode::NumLitNode(Token literal)
 }
 
 void NumLitNode::print() const {
-    std::cout << literal.lexeme;
+    std::cout << magic_enum::enum_name(type) << " " << literal.lexeme;
 }
 
 SmplType NumLitNode::get_type() {

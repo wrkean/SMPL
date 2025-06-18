@@ -1,6 +1,7 @@
 #include "ast/expr/boolean_literal.hpp"
 #include "smpl/types.hpp"
 #include <iostream>
+#include <magic_enum/magic_enum.hpp>
 
 BooleanLiteral::BooleanLiteral(Token literal)
     : literal(literal)
@@ -9,7 +10,7 @@ BooleanLiteral::BooleanLiteral(Token literal)
 }
 
 void BooleanLiteral::print() const {
-    std::cout << literal.lexeme;
+    std::cout << magic_enum::enum_name(type) << " " << literal.lexeme;
 }
 
 SmplType BooleanLiteral::get_type() {

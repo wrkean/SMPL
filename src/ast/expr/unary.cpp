@@ -4,6 +4,7 @@
 #include "token/token.hpp"
 #include "token/tokenkind.hpp"
 #include <iostream>
+#include <magic_enum/magic_enum.hpp>
 
 UnaryNode::UnaryNode(Token op, std::unique_ptr<ExprNode> right)
     : op(op), right(std::move(right))
@@ -12,7 +13,7 @@ UnaryNode::UnaryNode(Token op, std::unique_ptr<ExprNode> right)
 }
 
 void UnaryNode::print() const {
-    std::cout << "[" << op.lexeme << " ";
+    std::cout << magic_enum::enum_name(type) << " [" << op.lexeme << " ";
     right->print();
     std::cout << "]";
 }
