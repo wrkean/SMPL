@@ -3,6 +3,7 @@
 #include "smpl/types.hpp"
 #include "token/tokenkind.hpp"
 #include <iostream>
+#include <magic_enum/magic_enum.hpp>
 
 BinaryExpr::BinaryExpr(Token op, std::unique_ptr<ExprNode> left, std::unique_ptr<ExprNode> right)
     : op(op), left(std::move(left)), right(std::move(right))
@@ -11,7 +12,7 @@ BinaryExpr::BinaryExpr(Token op, std::unique_ptr<ExprNode> left, std::unique_ptr
 }
 
 void BinaryExpr::print() const {
-    std::cout << "(" << op.lexeme << " ";
+    std::cout << "(" << magic_enum::enum_name(type) << " " << op.lexeme << " ";
     left->print();
     std::cout << " ";
     right->print();
