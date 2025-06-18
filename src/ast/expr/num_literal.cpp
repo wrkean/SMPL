@@ -42,8 +42,6 @@ SmplType NumLitNode::get_type() {
     }
 
     switch (literal.kind) {
-        case TokenKind::StringLiteral:
-            return SmplType::String;
         case TokenKind::NumLiteral: {
             return lex.contains('.') ? SmplType::Float64 : SmplType::Int32;
         }

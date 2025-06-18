@@ -15,7 +15,6 @@ enum class SmplType {
     String,
     Char,
 
-    Error,
     Void,
     Unknown,
 };

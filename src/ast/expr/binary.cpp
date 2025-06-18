@@ -27,7 +27,8 @@ static inline bool is_integer(SmplType t) {
     return (t >= SmplType::Int8 && t <= SmplType::Uint);
 }
 
-static inline SmplType promote(SmplType a, SmplType b) {
+static SmplType promote(SmplType a, SmplType b) {
+    if (a == SmplType::Unknown || b == SmplType::Unknown) return SmplType::Unknown;
     return ((static_cast<int>(a) > static_cast<int>(b)) ? a : b);
 }
 
