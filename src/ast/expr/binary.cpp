@@ -23,6 +23,10 @@ static inline bool is_numeric(SmplType t) {
     return (t >= SmplType::Int8 && t <= SmplType::Float128);
 }
 
+static inline bool is_integer(SmplType t) {
+    return (t >= SmplType::Int8 && t <= SmplType::Uint);
+}
+
 static inline SmplType promote(SmplType a, SmplType b) {
     return ((static_cast<int>(a) > static_cast<int>(b)) ? a : b);
 }
@@ -43,6 +47,12 @@ static SmplType resolve_binary_type(TokenKind op, SmplType left_type, SmplType r
         if (left_type == right_type) return SmplType::Boolean;
         if (is_numeric(left_type) && is_numeric(right_type)) return SmplType::Boolean;
         throw TypeError("Invalid types for comparison");
+    }
+
+    if (op == TokenKind::As) return right_type; // Should be Unknown
+    if (op == TokenKind::Range) {
+        if (is_integer(left_type) && is_integer(right_type)) return SmplType::Unknown;
+        throw TypeError("Operands in range '..' operator should be integers");
     }
 
     // Arithmetic operators
