@@ -13,3 +13,7 @@ struct SyntaxError : public CompilerError {
 struct LexicalError : public CompilerError {
     using CompilerError::CompilerError;
 };
+
+struct TypeError : public CompilerError {
+    using CompilerError::CompilerError;
+};

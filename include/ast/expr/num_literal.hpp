@@ -8,7 +8,7 @@ class NumLitNode : public ExprNode {
 public:
     NumLitNode(Token literal);
     void print() const override;
-    SmplType get_type();
+    SmplType get_type() override;
 
     Token literal;
     SmplType type;
