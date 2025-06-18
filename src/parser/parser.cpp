@@ -199,18 +199,11 @@ std::unique_ptr<StmtNode> Parser::parse_assignment() {
     consume(TokenKind::Colon);
     Token type = consume(TokenKind::Identifier);
 
-    // TODO: Only handles equal operators! add more assignment operators like +=.
-    Token op = consume_any({
-        TokenKind::PlusEqual,
-        TokenKind::MinusEqual,
-        TokenKind::StarEqual,
-        TokenKind::ForSlashEqual,
-        TokenKind::Equal
-    }, "Expected assignment operator, found an unexpected token: " + peek().lexeme);
+    consume(TokenKind::Equal);
     auto right = parse_expression();
     consume(TokenKind::SemiColon);
 
-    return std::make_unique<AssignmentNode>(identifier, type, op, std::move(right));
+    return std::make_unique<AssignmentNode>(identifier, type, std::move(right));
 }
 
 std::unique_ptr<StmtNode> Parser::parse_return() {

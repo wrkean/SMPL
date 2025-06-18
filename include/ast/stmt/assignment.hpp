@@ -7,11 +7,10 @@
 
 class AssignmentNode : public StmtNode {
 public:
-    AssignmentNode(Token variable, Token var_type, Token op, std::unique_ptr<ExprNode> right);
+    AssignmentNode(Token variable, Token var_type, std::unique_ptr<ExprNode> right);
     void print() const override;
 
     Token variable;
     Token var_type;
-    Token op;
     std::unique_ptr<ExprNode> right;
 };
