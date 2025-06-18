@@ -19,7 +19,7 @@
 #include "ast/stmt/stmt.hpp"
 #include "ast/stmt/while.hpp"
 #include "error_reporter/compiler_err.hpp"
-#include "smpl.hpp"
+#include "smpl/smpl.hpp"
 #include "token/token.hpp"
 #include "token/tokenkind.hpp"
 #include <format>

@@ -1,4 +1,4 @@
-#include "smpl.hpp"
+#include "smpl/smpl.hpp"
 #include <cstdio>
 #include <iostream>
 
