@@ -58,7 +58,7 @@ defn main() {
     - binary expression
     - function calls
     - boolean expressions (including relational expressions)
--❌ Semantic Analysis
+- ❌ Semantic Analysis
 
 # Primitive Types
 An integer's name can be composed of its signedness and its bit-width. For example, i32 means it is a signed 32-bit integer and u32 means it is an unsigned 32-bit integer.
