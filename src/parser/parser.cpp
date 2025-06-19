@@ -383,6 +383,7 @@ Token Parser::consume(TokenKind expected) {
     throw SyntaxError(std::format("Unexpected token <{}>, expected <{}>.", oss.str(), oss2.str()));
 }
 
+// TODO: should I remove this?
 Token Parser::consume_any(std::initializer_list<TokenKind> expected_kinds, const std::string& err_msg) {
     for (auto& kind : expected_kinds) {
         if (kind == peek().kind) return advance();
