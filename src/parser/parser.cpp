@@ -249,6 +249,7 @@ std::unique_ptr<StmtNode> Parser::parse_if() {
     return std::make_unique<IfNode>(std::move(branches));
 }
 
+// TODO: Add more syntactic sugars (?)
 std::unique_ptr<StmtNode> Parser::parse_while() {
     consume(TokenKind::While);
     auto cond = parse_expression();
