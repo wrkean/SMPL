@@ -4,7 +4,8 @@
 #include <magic_enum/magic_enum.hpp>
 
 BooleanLiteral::BooleanLiteral(Token literal)
-    : literal(literal)
+    : literal(literal), kind(ExprASTKind::BooleanLiteral)
+
 {
     type = get_type();
 }

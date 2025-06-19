@@ -1,7 +1,7 @@
 #include "ast/stmt/assignment.hpp"
 #include <iostream>
 AssignmentNode::AssignmentNode(Token variable, Token var_type, std::unique_ptr<ExprNode> right)
-    : variable(variable), var_type(var_type), right(std::move(right)) { }
+    : variable(variable), var_type(var_type), right(std::move(right)), kind(StmtASTKind::Assignment) { }
 
 void AssignmentNode::print() const {
     std::cout << "Assignment\n";

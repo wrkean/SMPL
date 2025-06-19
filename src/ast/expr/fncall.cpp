@@ -3,7 +3,8 @@
 #include <iostream>
 
 FuncCallNode::FuncCallNode(Token identifier, std::vector<std::unique_ptr<ExprNode>> args)
-    : identifier(identifier), args(std::move(args))
+    : identifier(identifier), args(std::move(args)), kind(ExprASTKind::FnCall)
+
 {
     type = get_type();
 }

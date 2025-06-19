@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ast/ast_kinds.hpp"
 #include "ast/expr/expr.hpp"
 #include "smpl/types.hpp"
 #include <memory>
@@ -12,4 +13,5 @@ public:
 
     std::unique_ptr<ExprNode> expr;
     SmplType type;
+    ExprASTKind kind;
 };

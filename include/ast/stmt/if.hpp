@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ast/ast_kinds.hpp"
 #include "ast/stmt/condition_block.hpp"
 #include "ast/stmt/stmt.hpp"
 #include <vector>
@@ -10,4 +11,5 @@ public:
     void print() const override;
 
     std::vector<ConditionBlock> branches;
+    StmtASTKind kind;
 };

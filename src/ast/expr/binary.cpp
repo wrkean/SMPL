@@ -6,7 +6,7 @@
 #include <magic_enum/magic_enum.hpp>
 
 BinaryExpr::BinaryExpr(Token op, std::unique_ptr<ExprNode> left, std::unique_ptr<ExprNode> right)
-    : op(op), left(std::move(left)), right(std::move(right))
+    : op(op), left(std::move(left)), right(std::move(right)), kind(ExprASTKind::Binary)
 {
     type = get_type();
 }

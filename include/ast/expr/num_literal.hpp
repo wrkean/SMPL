@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ast/ast_kinds.hpp"
 #include "ast/expr/expr.hpp"
 #include "smpl/types.hpp"
 #include "token/token.hpp"
@@ -12,4 +13,5 @@ public:
 
     Token literal;
     SmplType type;
+    ExprASTKind kind;
 };

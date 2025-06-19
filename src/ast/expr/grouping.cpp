@@ -4,7 +4,8 @@
 #include <magic_enum/magic_enum.hpp>
 
 GroupingExpr::GroupingExpr(std::unique_ptr<ExprNode> expr)
-    : expr(std::move(expr))
+    : expr(std::move(expr)), kind(ExprASTKind::Grouping)
+
 {
     type = get_type();
 }

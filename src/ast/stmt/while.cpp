@@ -2,7 +2,7 @@
 #include <iostream>
 
 WhileNode::WhileNode(std::unique_ptr<ExprNode> condition, std::unique_ptr<StmtNode> block)
-    :  condition(std::move(condition)), block(std::move(block)) { }
+    :  condition(std::move(condition)), block(std::move(block)), kind(StmtASTKind::While) { }
 
 void WhileNode::print() const {
     std::cout << "While loop\n";

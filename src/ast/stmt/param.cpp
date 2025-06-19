@@ -4,7 +4,7 @@
 #include <vector>
 
 ParamNode::ParamNode(std::vector<std::pair<Token, Token>> params)
-    : params(params) { }
+    : params(params), kind(StmtASTKind::Param) { }
 
 void ParamNode::print() const {
     for (auto& param : params) {

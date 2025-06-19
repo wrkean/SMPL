@@ -3,7 +3,7 @@
 #include <memory>
 
 ReturnNode::ReturnNode(std::unique_ptr<ExprNode> return_expr)
-    : return_expr(std::move(return_expr)) { }
+    : return_expr(std::move(return_expr)), kind(StmtASTKind::Return) { }
 
 void ReturnNode::print() const {
     std::cout << "Return: ";

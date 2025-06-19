@@ -2,7 +2,7 @@
 #include <iostream>
 
 IfNode::IfNode(std::vector<ConditionBlock> branches)
-    : branches(std::move(branches)) { }
+    : branches(std::move(branches)), kind(StmtASTKind::If) { }
 
 void IfNode::print() const {
     std::cout << "If stmt\n";

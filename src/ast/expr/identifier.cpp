@@ -4,7 +4,8 @@
 #include <magic_enum/magic_enum.hpp>
 
 IdentifierNode::IdentifierNode(Token identifier)
-    : identifier(identifier)
+    : identifier(identifier), kind(ExprASTKind::Identifier)
+
 {
     type = get_type();
 }
