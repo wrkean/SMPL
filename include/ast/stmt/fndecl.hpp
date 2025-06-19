@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ast/ast_kinds.hpp"
 #include "ast/stmt/stmt.hpp"
 #include "token/token.hpp"
 #include <memory>
@@ -14,4 +15,5 @@ public:
     std::unique_ptr<StmtNode> params;
     std::optional<Token> return_type;
     std::unique_ptr<StmtNode> block;
+    StmtASTKind kind;
 };

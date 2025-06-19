@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ast/ast_kinds.hpp"
 #include "ast/expr/expr.hpp"
 #include "ast/stmt/stmt.hpp"
 #include <memory>
@@ -11,4 +12,5 @@ public:
 
     std::unique_ptr<ExprNode> condition;
     std::unique_ptr<StmtNode> block;
+    StmtASTKind kind;
 };

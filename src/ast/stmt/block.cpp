@@ -3,7 +3,7 @@
 #include <iostream>
 
 BlockNode::BlockNode(std::vector<std::unique_ptr<StmtNode>> statements)
-    : statements(std::move(statements)) { }
+    : statements(std::move(statements)), kind(StmtASTKind::Block) { }
 
 void BlockNode::print() const {
     std::cout << "{\n";

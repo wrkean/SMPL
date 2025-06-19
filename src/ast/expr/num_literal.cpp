@@ -8,7 +8,8 @@
 #include <vector>
 
 NumLitNode::NumLitNode(Token literal)
-    : literal(literal)
+    : literal(literal), kind(ExprASTKind::NumberLiteral)
+
 {
     type = get_type();
 }

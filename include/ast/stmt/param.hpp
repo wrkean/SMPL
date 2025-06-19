@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ast/ast_kinds.hpp"
 #include "ast/stmt/stmt.hpp"
 #include "token/token.hpp"
 #include <utility>
@@ -11,4 +12,5 @@ public:
     void print() const override;
 
     std::vector<std::pair<Token, Token>> params;
+    StmtASTKind kind;
 };

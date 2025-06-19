@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ast/ast_kinds.hpp"
 #include "ast/expr/expr.hpp"
 #include "ast/stmt/stmt.hpp"
 #include "token/token.hpp"
@@ -13,4 +14,5 @@ public:
     Token variable;
     Token var_type;
     std::unique_ptr<ExprNode> right;
+    StmtASTKind kind;
 };
