@@ -9,7 +9,6 @@ class BinaryExpr : public ExprNode {
 public:
     BinaryExpr(Token op, std::unique_ptr<ExprNode> left, std::unique_ptr<ExprNode> right);
     void print() const override;
-    SmplType get_type() override;
     ExprASTKind get_kind() const override { return kind; }
 
     Token op;
