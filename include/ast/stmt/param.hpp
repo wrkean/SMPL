@@ -10,6 +10,7 @@ class ParamNode : public StmtNode {
 public:
     ParamNode(std::vector<std::pair<Token, Token>> params);
     void print() const override;
+    StmtASTKind get_kind() const override { return kind; }
 
     std::vector<std::pair<Token, Token>> params;
     StmtASTKind kind;

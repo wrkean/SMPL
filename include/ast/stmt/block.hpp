@@ -9,6 +9,7 @@ class BlockNode : public StmtNode {
 public:
     BlockNode(std::vector<std::unique_ptr<StmtNode>> statements);
     void print() const override;
+    StmtASTKind get_kind() const override { return kind; }
 
     std::vector<std::unique_ptr<StmtNode>> statements;
     StmtASTKind kind;

@@ -10,6 +10,7 @@ public:
     NumLitNode(Token literal);
     void print() const override;
     SmplType get_type() override;
+    ExprASTKind get_kind() const override { return kind; }
 
     Token literal;
     SmplType type;

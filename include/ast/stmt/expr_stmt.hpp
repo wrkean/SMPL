@@ -9,6 +9,7 @@ class ExprStmt : public StmtNode {
 public:
     ExprStmt(std::unique_ptr<ExprNode> expr);
     void print() const override;
+    StmtASTKind get_kind() const override { return kind; }
 
     std::unique_ptr<ExprNode> expr;
     StmtASTKind kind;

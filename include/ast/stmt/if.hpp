@@ -9,6 +9,7 @@ class IfNode : public StmtNode {
 public:
     IfNode(std::vector<ConditionBlock> branches);
     void print() const override;
+    StmtASTKind get_kind() const override { return kind; }
 
     std::vector<ConditionBlock> branches;
     StmtASTKind kind;

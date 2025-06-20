@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 enum class SmplType {
     Int8, Uint8,
     Int16, Uint16,
@@ -18,3 +19,5 @@ enum class SmplType {
     Void,
     Unknown,
 };
+
+SmplType str_to_type(const std::string& id);
