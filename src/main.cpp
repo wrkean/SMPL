@@ -1,5 +1,6 @@
 #include "lexer/lexer.hpp"
 #include "parser/parser.hpp"
+#include "semantic_analyzer/semantic_analyzer.hpp"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -34,6 +35,9 @@ void run(const std::string& source) {
         statement->print();
         std::cout << "\n";
     }
+
+    SemanticAnalyzer analyzer(statements);
+    analyzer.analyze();
 }
 
 

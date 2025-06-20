@@ -131,7 +131,7 @@ std::unique_ptr<StmtNode> Parser::parse_statement() {
         case TokenKind::Minus:
             return parse_expr_stmt();
         default:
-            throw SyntaxError(std::format("Unexpected token: {}", peek().lexeme));
+            throw SyntaxError(std::format("Unexpected token: {}", peek().lexeme), peek().line);
     }
 }
 
@@ -147,7 +147,7 @@ std::unique_ptr<StmtNode> Parser::parse_fndecl() {
         advance();      // Consume '->'
         return_type = consume(TokenKind::Identifier);
     } else if (peek().kind != TokenKind::LeftBrace) {
-        throw SyntaxError("Expected block{} or '->'");
+        throw SyntaxError("Expected block{} or '->'", peek().line);
     }
 
     auto block = parse_block();
@@ -185,7 +185,7 @@ std::unique_ptr<StmtNode> Parser::parse_params() {
         if (peek().kind == TokenKind::Comma) {
             advance();
         } else if (peek().kind != TokenKind::RightParen) {
-            throw SyntaxError("Expected ')' or ','");
+            throw SyntaxError("Expected ')' or ','", peek().line);
         }
     }
     consume(TokenKind::RightParen);
@@ -279,7 +279,7 @@ std::unique_ptr<ExprNode> Parser::parse_fncall(Token id) {
         if (peek().kind == TokenKind::Comma) {
             advance();
         } else if (peek().kind != TokenKind::RightParen) {
-            throw SyntaxError("Expexted ')' or ','");
+            throw SyntaxError("Expexted ')' or ','", peek().line);
         }
     }
     consume(TokenKind::RightParen);
@@ -323,7 +323,7 @@ std::unique_ptr<ExprNode> Parser::nud(Token token) {
             return std::make_unique<UnaryNode>(op, std::move(right));
         }
         default:
-            throw SyntaxError("Expected an expression");
+            throw SyntaxError("Expected an expression", peek().line);
     }
 }
 
@@ -370,7 +370,7 @@ Assoc Parser::get_associativity(Token op) {
         return op_info.associativity;
     }
 
-    throw SyntaxError(std::format("Unexpected operator '{}' in expression", op.lexeme));
+    throw SyntaxError(std::format("Unexpected operator '{}' in expression", op.lexeme), peek().line);
 }
 
 Token Parser::consume(TokenKind expected) {
@@ -381,7 +381,7 @@ Token Parser::consume(TokenKind expected) {
     oss << magic_enum::enum_name(peek().kind);
     oss2 << magic_enum::enum_name(expected);
 
-    throw SyntaxError(std::format("Unexpected token <{}>, expected <{}>.", oss.str(), oss2.str()));
+    throw SyntaxError(std::format("Unexpected token <{}>, expected <{}>.", oss.str(), oss2.str()), peek().line);
 }
 
 // TODO: should I remove this?
@@ -390,7 +390,7 @@ Token Parser::consume_any(std::initializer_list<TokenKind> expected_kinds, const
         if (kind == peek().kind) return advance();
     }
 
-    throw SyntaxError(err_msg);
+    throw SyntaxError(err_msg, peek().line);
 }
 
 Token Parser::advance() {
