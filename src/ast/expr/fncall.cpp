@@ -1,13 +1,8 @@
 #include "ast/expr/fncall.hpp"
-#include "smpl/types.hpp"
 #include <iostream>
 
 FuncCallNode::FuncCallNode(Token identifier, std::vector<std::unique_ptr<ExprNode>> args)
-    : identifier(identifier), args(std::move(args)), kind(ExprASTKind::FnCall)
-
-{
-    type = get_type();
-}
+    : identifier(identifier), args(std::move(args)), kind(ExprASTKind::FnCall) { }
 
 void FuncCallNode::print() const {
     std::cout << "Function call\n";
@@ -18,9 +13,4 @@ void FuncCallNode::print() const {
         std::cout << " ";
     }
     std::cout << "\nEnd function call";
-}
-
-SmplType FuncCallNode::get_type() {
-    // Can't deduce yet
-    return SmplType::Unknown;
 }

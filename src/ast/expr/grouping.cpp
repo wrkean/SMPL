@@ -1,21 +1,12 @@
 #include "ast/expr/grouping.hpp"
-#include "smpl/types.hpp"
 #include <iostream>
 #include <magic_enum/magic_enum.hpp>
 
 GroupingExpr::GroupingExpr(std::unique_ptr<ExprNode> expr)
-    : expr(std::move(expr)), kind(ExprASTKind::Grouping)
-
-{
-    type = get_type();
-}
+    : expr(std::move(expr)), kind(ExprASTKind::Grouping) { }
 
 void GroupingExpr::print() const {
-    std::cout << magic_enum::enum_name(type) << " {";
+    std::cout << "{";
     expr->print();
     std::cout << "}";
-}
-
-SmplType GroupingExpr::get_type() {
-    return expr->get_type();
 }

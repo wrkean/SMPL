@@ -2,7 +2,6 @@
 
 #include "ast/ast_kinds.hpp"
 #include "ast/expr/expr.hpp"
-#include "smpl/types.hpp"
 #include "token/token.hpp"
 
 class IdentifierNode : public ExprNode {
@@ -13,6 +12,5 @@ public:
     ExprASTKind get_kind() const override { return kind; }
 
     Token identifier;
-    SmplType type;
     ExprASTKind kind;
 };
