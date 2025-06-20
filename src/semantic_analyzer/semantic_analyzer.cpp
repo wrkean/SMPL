@@ -9,6 +9,7 @@
 #include "ast/stmt/assignment.hpp"
 #include "error_reporter/compiler_err.hpp"
 #include "smpl/symbol.hpp"
+#include "smpl/type_checker.hpp"
 #include "smpl/types.hpp"
 #include "token/tokenkind.hpp"
 #include <memory>
@@ -16,24 +17,7 @@
 // TODO: Finish and clean these up
 
 SemanticAnalyzer::SemanticAnalyzer(std::unique_ptr<StmtNode>& root)
-    : root(root)
-{
-    type_table.emplace("i8", SmplType::Int8);
-    type_table.emplace("u8", SmplType::Uint8);
-    type_table.emplace("i16", SmplType::Int16);
-    type_table.emplace("u16", SmplType::Uint16);
-    type_table.emplace("i32", SmplType::Int32);
-    type_table.emplace("u32", SmplType::Uint32);
-    type_table.emplace("i64", SmplType::Int64);
-    type_table.emplace("u64", SmplType::Uint64);
-    type_table.emplace("f16", SmplType::Float16);
-    type_table.emplace("f32", SmplType::Float32);
-    type_table.emplace("f64", SmplType::Float64);
-    type_table.emplace("f128", SmplType::Float128);
-    type_table.emplace("bool", SmplType::Boolean);
-    // type_table.emplace("str", SmplType::String); TODO: Implement string type later
-    type_table.emplace("char", SmplType::Char);
-}
+    : root(root) { }
 
 bool SemanticAnalyzer::declare_symbol(const std::string& name, Symbol symbol) {
     if (symbol_table.empty()) throw CompilerError("No scope available for declaration");
@@ -60,33 +44,6 @@ void SemanticAnalyzer::exit_scope() {
     symbol_table.pop_back();
 }
 
-bool SemanticAnalyzer::is_integer(SmplType type) const {
-    return type >= SmplType::Int8 && type <= SmplType::Uint;
-}
-
-bool SemanticAnalyzer::is_floating(SmplType type) const {
-    return type >= SmplType::Float16 && type <= SmplType::Float128;
-}
-
-bool SemanticAnalyzer::is_numeric(SmplType type) const {
-    return is_integer(type) || is_floating(type);
-}
-
-SmplType SemanticAnalyzer::promote(SmplType a, SmplType b) const {
-    if (!is_numeric(a)) throw TypeError("Invalid left hand type, it must be numerical");
-    if (!is_numeric(b)) throw TypeError("Invalid right hand type, it must be numerical");
-    // TODO: Better message
-    // FIXME: Might be buggy, or can be improved
-    if (!(is_integer(a) && is_integer(b)) && !(is_floating(a) && is_floating(b))) throw TypeError("Floating-point and integer operations not supported");
-
-    return (static_cast<int>(a) > static_cast<int>(b)) ? a : b;
-}
-
-SmplType SemanticAnalyzer::str_to_type(const std::string& type_str) const {
-    if (type_table.contains(type_str)) return type_table.at(type_str);
-    throw TypeError("Invalid type");
-}
-
 // TODO: Implement analyze_expr
 SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
     switch (expr->get_kind()) {
@@ -98,8 +55,8 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
             switch (node->op.kind) {
                 case TokenKind::As: return right_type;
                 case TokenKind::Range:
-                    if (is_integer(left_type) && is_integer(right_type)) {
-                        return promote(left_type, right_type);
+                    if (TypeChecker::is_integer(left_type) && TypeChecker::is_integer(right_type)) {
+                        return TypeChecker::promote(left_type, right_type);
                     }
                     throw TypeError("Both operands must be integers");
                 case TokenKind::Equal:
@@ -115,7 +72,7 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
                 case TokenKind::PercentEqual:
                     // NOTE: Might be redundant
                     if (node->right->get_kind() == ExprASTKind::NumberLiteral) {
-                        return promote(left_type, right_type);
+                        return TypeChecker::promote(left_type, right_type);
                     }
                     if (left_type == right_type) {
                         return left_type;
@@ -133,8 +90,8 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
                 case TokenKind::LesserEqual:
                 case TokenKind::GreaterThan:
                 case TokenKind::GreaterEqual:
-                    if (is_numeric(left_type) && is_numeric(right_type)) {
-                        return promote(left_type, right_type);
+                    if (TypeChecker::is_numeric(left_type) && TypeChecker::is_numeric(right_type)) {
+                        return TypeChecker::promote(left_type, right_type);
                     }
                     throw TypeError("Relational operators only accepts numeric values as operands");
                 default:
@@ -178,7 +135,7 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
                     }
                     throw TypeError("Unary 'not' operator only accepts a boolean as an operand");
                 case TokenKind::Minus:
-                    if (is_numeric(right_type)) {
+                    if (TypeChecker::is_numeric(right_type)) {
                         return right_type;
                     }
                     throw TypeError("Unary '-' operator only accepts a numerical value as an operand");
@@ -193,7 +150,7 @@ void SemanticAnalyzer::analyze_stmt(std::unique_ptr<StmtNode>& stmt) {
     switch (stmt->get_kind()) {
         case StmtASTKind::Assignment: {
             AssignmentNode* node = dynamic_cast<AssignmentNode*>(stmt.get());
-            SmplType type = str_to_type(node->var_type.lexeme);
+            SmplType type = TypeChecker::str_to_type(node->var_type.lexeme);
 
             if (!declare_symbol(node->variable.lexeme, Symbol(type, node->variable)))
                 throw CompilerError("Redeclaration of variable");
