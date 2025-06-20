@@ -19,5 +19,3 @@ enum class SmplType {
     Void,
     Unknown,
 };
-
-SmplType str_to_type(const std::string& id);
