@@ -187,7 +187,7 @@ void Lexer::lex_token() {
                 lex_number();
             } else {
                 std::string msg = std::format("[{}]: Unexpected character: {}", line, ch);
-                throw LexicalError(msg);
+                throw LexicalError(msg, line);
             }
             break;
     }
@@ -208,7 +208,7 @@ void Lexer::lex_string() {
     }
 
     if (at_end() || peek() == '\n') {
-        throw LexicalError(std::format("[{}]: Unterminated string literal", line));
+        throw LexicalError(std::format("[{}]: Unterminated string literal", line), line);
     }
 
     std::string lexeme = source.substr(start + 1, current - start - 1);

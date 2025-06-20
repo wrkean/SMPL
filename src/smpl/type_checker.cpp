@@ -1,6 +1,7 @@
 #include "smpl/type_checker.hpp"
 #include "error_reporter/compiler_err.hpp"
 #include "smpl/types.hpp"
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 
@@ -33,17 +34,16 @@ bool TypeChecker::is_numeric(SmplType type) {
     return is_integer(type) || is_floating(type);
 }
 
-SmplType TypeChecker::promote(SmplType a, SmplType b) {
-    if (!is_numeric(a)) throw TypeError("Invalid left hand type, it must be numerical");
-    if (!is_numeric(b)) throw TypeError("Invalid right hand type, it must be numerical");
+SmplType TypeChecker::promote(SmplType a, SmplType b, int64_t line_number) {
+    if (!is_numeric(a)) throw TypeError("Invalid left hand type, it must be numerical", line_number);
+    if (!is_numeric(b)) throw TypeError("Invalid right hand type, it must be numerical", line_number);
     // TODO: Better message
     // FIXME: Might be buggy, or can be improved
-    if (!(is_integer(a) && is_integer(b)) && !(is_floating(a) && is_floating(b))) throw TypeError("Floating-point and integer operations not supported");
-
+    if (!(is_integer(a) && is_integer(b)) && !(is_floating(a) && is_floating(b))) throw TypeError("Floating-point and integer operations not supported", line_number);
     return (static_cast<int>(a) > static_cast<int>(b)) ? a : b;
 }
 
-SmplType TypeChecker::str_to_type(const std::string& type_str) {
+SmplType TypeChecker::str_to_type(const std::string& type_str, int64_t line_number) {
     if (type_table.contains(type_str)) return type_table.at(type_str);
-    throw TypeError("Invalid type");
+    throw TypeError("Invalid type", line_number);
 }
