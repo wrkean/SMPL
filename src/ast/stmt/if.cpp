@@ -1,8 +1,8 @@
 #include "ast/stmt/if.hpp"
 #include <iostream>
 
-IfNode::IfNode(std::vector<ConditionBlock> branches)
-    : branches(std::move(branches)), kind(StmtASTKind::If) { }
+IfNode::IfNode(std::vector<ConditionBlock> branches, size_t line)
+    : branches(std::move(branches)), kind(StmtASTKind::If), line(line) { }
 
 void IfNode::print() const {
     std::cout << "If stmt\n";

@@ -8,12 +8,14 @@
 
 class ForNode : public StmtNode {
 public:
-    ForNode(Token bind_var, std::unique_ptr<ExprNode> iterator, std::unique_ptr<StmtNode> block);
+    ForNode(Token bind_var, std::unique_ptr<ExprNode> iterator, std::unique_ptr<StmtNode> block, size_t line);
     void print() const override;
     StmtASTKind get_kind() const override { return kind; }
+    size_t get_line() const override { return line; }
 
     Token bind_var;
     std::unique_ptr<ExprNode> iterator;
     std::unique_ptr<StmtNode> block;
     StmtASTKind kind;
+    size_t line;
 };

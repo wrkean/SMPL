@@ -7,10 +7,12 @@
 
 class ExprStmt : public StmtNode {
 public:
-    ExprStmt(std::unique_ptr<ExprNode> expr);
+    ExprStmt(std::unique_ptr<ExprNode> expr, size_t line);
     void print() const override;
     StmtASTKind get_kind() const override { return kind; }
+    size_t get_line() const override { return line; }
 
     std::unique_ptr<ExprNode> expr;
     StmtASTKind kind;
+    size_t line;
 };

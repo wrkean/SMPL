@@ -1,8 +1,8 @@
 #include "ast/stmt/fndecl.hpp"
 #include <iostream>
 
-DefnNode::DefnNode(Token identifier, std::unique_ptr<StmtNode> params, std::optional<Token> return_type, std::unique_ptr<StmtNode> block)
-    : identifier(identifier), params(std::move(params)), return_type(return_type), block(std::move(block)), kind(StmtASTKind::FnDecl) { }
+DefnNode::DefnNode(Token identifier, std::unique_ptr<StmtNode> params, std::optional<Token> return_type, std::unique_ptr<StmtNode> block, size_t line)
+    : identifier(identifier), params(std::move(params)), return_type(return_type), block(std::move(block)), kind(StmtASTKind::FnDecl), line(line) { }
 
 void DefnNode::print() const {
     std::cout << "Function name: " << identifier.lexeme << "\n";

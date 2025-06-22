@@ -6,10 +6,12 @@
 
 class IdentifierNode : public ExprNode {
 public:
-    IdentifierNode(Token identifier);
+    IdentifierNode(Token identifier, size_t line);
     void print() const override;
     ExprASTKind get_kind() const override { return kind; }
+    size_t get_line() const override { return line; }
 
     Token identifier;
     ExprASTKind kind;
+    size_t line;
 };

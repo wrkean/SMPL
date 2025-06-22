@@ -6,10 +6,12 @@
 
 class NumLitNode : public ExprNode {
 public:
-    NumLitNode(Token literal);
+    NumLitNode(Token literal, size_t line);
     void print() const override;
     ExprASTKind get_kind() const override { return kind; }
+    size_t get_line() const override { return line; }
 
     Token literal;
     ExprASTKind kind;
+    size_t line;
 };

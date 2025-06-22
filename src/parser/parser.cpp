@@ -136,7 +136,7 @@ std::unique_ptr<StmtNode> Parser::parse_statement() {
 }
 
 std::unique_ptr<StmtNode> Parser::parse_fndecl() {
-    consume(TokenKind::Defn);
+    size_t line = consume(TokenKind::Defn).line;
     Token identifier = consume(TokenKind::Identifier);
 
     auto params = parse_params();
@@ -151,7 +151,7 @@ std::unique_ptr<StmtNode> Parser::parse_fndecl() {
     }
 
     auto block = parse_block();
-    return std::make_unique<DefnNode>(identifier, std::move(params), return_type, std::move(block));
+    return std::make_unique<DefnNode>(identifier, std::move(params), return_type, std::move(block), line);
 }
 
 std::unique_ptr<StmtNode> Parser::parse_block() {

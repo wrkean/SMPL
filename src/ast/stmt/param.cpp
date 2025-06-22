@@ -3,8 +3,8 @@
 #include <utility>
 #include <vector>
 
-ParamNode::ParamNode(std::vector<std::pair<Token, Token>> params)
-    : params(params), kind(StmtASTKind::Param) { }
+ParamNode::ParamNode(std::vector<std::pair<Token, Token>> params, size_t line)
+    : params(params), kind(StmtASTKind::Param), line(line) { }
 
 void ParamNode::print() const {
     for (auto& param : params) {

@@ -8,10 +8,12 @@
 
 class ParamNode : public StmtNode {
 public:
-    ParamNode(std::vector<std::pair<Token, Token>> params);
+    ParamNode(std::vector<std::pair<Token, Token>> params, size_t line);
     void print() const override;
     StmtASTKind get_kind() const override { return kind; }
+    size_t get_line() const override { return line; }
 
     std::vector<std::pair<Token, Token>> params;
     StmtASTKind kind;
+    size_t line;
 };

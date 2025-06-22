@@ -2,14 +2,19 @@
 
 #include <string>
 enum class SmplType {
-    Int8, Uint8,
-    Int16, Uint16,
-    Int32, Uint32,
-    Int64, Uint64,
-    Int, Uint,
+    Int8,
+    Int16,
+    Int32,
+    Int64,
+    Int,
+    Uint8,
+    Uint16,
+    Uint32,
+    Uint64,
+    Uint,
 
-    Float16, Float32,
-    Float64, Float128,
+    Float32,
+    Float64,
 
     Boolean,
 
@@ -17,5 +22,8 @@ enum class SmplType {
     Char,
 
     Void,
+    UntypedInt,
+    UntypedFloat,
+    Range,
     Unknown,
 };

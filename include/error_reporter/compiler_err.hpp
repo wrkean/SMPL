@@ -1,12 +1,11 @@
 #pragma once
 
-#include <cstdint>
 #include <stdexcept>
 #include <string>
 
 struct CompilerError : public std::runtime_error {
-    int64_t line_number;
-    CompilerError(const std::string& message, int line_number)
+    size_t line_number;
+    CompilerError(const std::string& message, size_t line_number)
         : std::runtime_error(message), line_number(line_number) {}
 };
 

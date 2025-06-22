@@ -6,10 +6,12 @@
 
 class GroupingExpr : public ExprNode {
 public:
-    GroupingExpr(std::unique_ptr<ExprNode> expr);
+    GroupingExpr(std::unique_ptr<ExprNode> expr, size_t line);
     void print() const override;
     ExprASTKind get_kind() const override { return kind; }
+    size_t get_line() const override { return line; }
 
     std::unique_ptr<ExprNode> expr;
     ExprASTKind kind;
+    size_t line;
 };
