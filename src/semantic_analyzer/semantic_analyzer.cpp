@@ -24,6 +24,7 @@
 #include "token/tokenkind.hpp"
 #include <cstdlib>
 #include <format>
+#include <iostream>
 #include <magic_enum/magic_enum.hpp>
 #include <memory>
 #include <sstream>
@@ -39,9 +40,15 @@ SemanticAnalyzer::SemanticAnalyzer(std::vector<std::unique_ptr<StmtNode>>& progr
 bool SemanticAnalyzer::declare_symbol(const std::string& name, Symbol symbol) {
     if (symbol_table.empty()) throw CompilerError("No scope available for declaration", symbol.token.line);
     if (symbol_table.back().contains(name)) return false;   // Cant declare, already declared
+    //
+    try {
+        TypeChecker::str_to_type(name, symbol.token.line);
+    } catch (...) {
+        symbol_table.back().emplace(name, symbol);
+        return true;
+    }
 
-    symbol_table.back().emplace(name, symbol);
-    return true;
+    throw CompilerError(std::format("Cannot declare built-in primitive type name: {}", name), symbol.token.line);
 }
 
 Symbol* SemanticAnalyzer::lookup(const std::string& name) {
@@ -61,16 +68,20 @@ void SemanticAnalyzer::exit_scope() {
     symbol_table.pop_back();
 }
 
-void SemanticAnalyzer::analyze() {
+bool SemanticAnalyzer::analyze() {
+    bool had_error = false;
     enter_scope();
     for (auto& statement : program) {
         try {
             analyze_stmt(statement);
         } catch (const CompilerError& err) {
             Smpl::error(err.line_number, err.what());
+            had_error = true;
         }
     }
     exit_scope();
+
+    return had_error;
 }
 
 void SemanticAnalyzer::analyze_stmt(std::unique_ptr<StmtNode>& stmt) {
@@ -82,11 +93,15 @@ void SemanticAnalyzer::analyze_stmt(std::unique_ptr<StmtNode>& stmt) {
             //       ^^^ as in assignment
             // TODO: Better error report
             if (!TypeChecker::are_assign_compatible(ass_type, right_type)) {
-                throw TypeError("Incompatible types for assignment", stmt->get_line());
+                std::ostringstream left_type_str;
+                std::ostringstream right_type_str;
+                left_type_str << magic_enum::enum_name(ass_type);
+                right_type_str << magic_enum::enum_name(right_type);
+                throw TypeError(std::format("Incompatible types for assignment: {} to {}", right_type_str.str(), left_type_str.str()), stmt->get_line());
             } else {
-                if (assignment->right->get_kind() == ExprASTKind::NumberLiteral) {
-                    NumLitNode* numlit = dynamic_cast<NumLitNode*>(assignment->right.get());
+                if (auto* numlit = dynamic_cast<NumLitNode*>(assignment->right.get())) {
                     if (!TypeChecker::fits_in_type(ass_type, numlit->literal.lexeme)) {
+                        // TODO: Better error messages
                         throw CompilerError("An overflow occured", numlit->get_line());
                     }
                 }
@@ -160,7 +175,12 @@ void SemanticAnalyzer::analyze_stmt(std::unique_ptr<StmtNode>& stmt) {
             ReturnNode* return_node = dynamic_cast<ReturnNode*>(stmt.get());
             SmplType return_type = analyze_expr(return_node->return_expr);
             if (!TypeChecker::are_assign_compatible(cur_func_return_type, return_type)) {
-                throw TypeError("");
+                if (auto* numlit = dynamic_cast<NumLitNode*>(return_node->return_expr.get())) {
+                    if (!TypeChecker::fits_in_type(return_type, numlit->literal.lexeme)) {
+                        throw CompilerError("An overflow occured", numlit->get_line());
+                    }
+                }
+                throw TypeError("Expression type does not match the function's return type", return_node->return_expr->get_line());
             }
         } break;
         case StmtASTKind::While: {
@@ -179,18 +199,29 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
             SmplType right_type = analyze_expr(binary->right);
 
             if (!TypeChecker::are_binary_compatible(left_type, right_type)) {
-                std::ostringstream left_type_str, right_type_str;
+                if (binary->op.kind == TokenKind::As) {
+                    // Except for as operator, we go out of the if statement
+                    goto escape;
+                }
+                std::ostringstream left_type_str, right_type_str, op_str;
                 left_type_str << magic_enum::enum_name(left_type);
                 right_type_str << magic_enum::enum_name(right_type);
-                throw TypeError(std::format("Incompatible types for binary operation: {} and {}", left_type_str.str(), right_type_str.str()), binary->get_line());
+                op_str << magic_enum::enum_name(binary->op.kind);
+                throw TypeError(std::format("Incompatible types for binary operation: {} <{}> {}", left_type_str.str(), op_str.str(), right_type_str.str()), binary->get_line());
             }
-
+        escape:
             switch (binary->op.kind) {
                 case TokenKind::Plus:
                 case TokenKind::Minus:
                 case TokenKind::Star:
                 case TokenKind::ForSlash:
                 case TokenKind::Percent:
+                case TokenKind::Equal:
+                case TokenKind::PlusEqual:
+                case TokenKind::MinusEqual:
+                case TokenKind::StarEqual:
+                case TokenKind::ForSlashEqual:
+                case TokenKind::PercentEqual:
                     return left_type; // safe: both are same and numeric
 
                 case TokenKind::EqualEqual:
@@ -204,7 +235,11 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
                     return SmplType::Boolean;
 
                 case TokenKind::As:
-                    return right_type; // type cast to right
+                    // if (auto* id = dynamic_cast<IdentifierNode*>(binary->right.get())) {
+                    //     return TypeChecker::str_to_type(id->identifier.lexeme, id->get_line());
+                    // }
+                    // throw CompilerError("Expected an identifier after 'as'", binary->right->get_line());
+                    return right_type;
 
                 case TokenKind::Range:
                     return SmplType::Range;
@@ -244,12 +279,18 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
         }
         case ExprASTKind::Identifier: {
             IdentifierNode* identifier = dynamic_cast<IdentifierNode*>(expr.get());
-            Symbol* variable = lookup(identifier->identifier.lexeme);
-            if (!variable) {
-                throw CompilerError(std::format("{} is not defined", identifier->identifier.lexeme), identifier->get_line());
-            }
+            SmplType type;
+            try {
+                type = TypeChecker::str_to_type(identifier->identifier.lexeme, identifier->get_line());
+            } catch (...) {
+                Symbol* variable = lookup(identifier->identifier.lexeme);
+                if (!variable) {
+                    throw CompilerError(std::format("{} is not defined", identifier->identifier.lexeme), identifier->get_line());
+                }
 
-            return variable->type;
+                return variable->type;
+            }
+            return type;
         }
         case ExprASTKind::NumberLiteral: {
             NumLitNode* numlit = dynamic_cast<NumLitNode*>(expr.get());

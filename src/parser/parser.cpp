@@ -22,6 +22,7 @@
 #include "smpl/smpl.hpp"
 #include "token/token.hpp"
 #include "token/tokenkind.hpp"
+#include <cstddef>
 #include <format>
 #include <initializer_list>
 #include <magic_enum/magic_enum.hpp>
@@ -155,7 +156,7 @@ std::unique_ptr<StmtNode> Parser::parse_fndecl() {
 }
 
 std::unique_ptr<StmtNode> Parser::parse_block() {
-    consume(TokenKind::LeftBrace);
+    size_t line = consume(TokenKind::LeftBrace).line;
     std::vector<std::unique_ptr<StmtNode>> statements;
 
     while (peek().kind != TokenKind::RightBrace) {
@@ -168,11 +169,11 @@ std::unique_ptr<StmtNode> Parser::parse_block() {
         }
     }
     consume(TokenKind::RightBrace);
-    return std::make_unique<BlockNode>(std::move(statements));
+    return std::make_unique<BlockNode>(std::move(statements), line);
 }
 
 std::unique_ptr<StmtNode> Parser::parse_params() {
-    consume(TokenKind::LeftParen);
+    size_t line = consume(TokenKind::LeftParen).line;
     std::vector<std::pair<Token, Token>> params;
 
     while (peek().kind != TokenKind::RightParen) {
@@ -189,11 +190,11 @@ std::unique_ptr<StmtNode> Parser::parse_params() {
         }
     }
     consume(TokenKind::RightParen);
-    return std::make_unique<ParamNode>(params);
+    return std::make_unique<ParamNode>(params, line);
 }
 
 std::unique_ptr<StmtNode> Parser::parse_assignment() {
-    consume(TokenKind::Let);
+    size_t line = consume(TokenKind::Let).line;
     Token identifier = consume(TokenKind::Identifier);
 
     consume(TokenKind::Colon);
@@ -203,30 +204,30 @@ std::unique_ptr<StmtNode> Parser::parse_assignment() {
     auto right = parse_expression();
     consume(TokenKind::SemiColon);
 
-    return std::make_unique<AssignmentNode>(identifier, type, std::move(right));
+    return std::make_unique<AssignmentNode>(identifier, type, std::move(right), line);
 }
 
 std::unique_ptr<StmtNode> Parser::parse_return() {
-    consume(TokenKind::Return);
+    size_t line = consume(TokenKind::Return).line;
     auto expr = parse_expression();
     consume(TokenKind::SemiColon);
-    return std::make_unique<ReturnNode>(std::move(expr));
+    return std::make_unique<ReturnNode>(std::move(expr), line);
 }
 
 std::unique_ptr<StmtNode> Parser::parse_for() {
-    consume(TokenKind::For);
+    size_t line = consume(TokenKind::For).line;
     Token bind_var = consume(TokenKind::Identifier);
     consume(TokenKind::In);
     auto iterator = parse_expression();
     auto block = parse_block();
 
-    return std::make_unique<ForNode>(bind_var, std::move(iterator), std::move(block));
+    return std::make_unique<ForNode>(bind_var, std::move(iterator), std::move(block), line);
 }
 
 std::unique_ptr<StmtNode> Parser::parse_if() {
     std::vector<ConditionBlock> branches;
 
-    consume(TokenKind::If);
+    size_t line = consume(TokenKind::If).line;
 
     auto cond = parse_expression();
     auto block = parse_block();
@@ -246,16 +247,16 @@ std::unique_ptr<StmtNode> Parser::parse_if() {
         break;
     }
 
-    return std::make_unique<IfNode>(std::move(branches));
+    return std::make_unique<IfNode>(std::move(branches), line);
 }
 
 // TODO: Add more syntactic sugars (?)
 std::unique_ptr<StmtNode> Parser::parse_while() {
-    consume(TokenKind::While);
+    size_t line = consume(TokenKind::While).line;
     auto cond = parse_expression();
     auto block = parse_block();
 
-    return std::make_unique<WhileNode>(std::move(cond), std::move(block));
+    return std::make_unique<WhileNode>(std::move(cond), std::move(block), line);
 }
 
 std::unique_ptr<ExprNode> Parser::parse_expression(int prec) {
@@ -283,25 +284,25 @@ std::unique_ptr<ExprNode> Parser::parse_fncall(Token id) {
         }
     }
     consume(TokenKind::RightParen);
-    return std::make_unique<FuncCallNode>(id, std::move(args));
+    return std::make_unique<FuncCallNode>(id, std::move(args), id.line);
 }
 
 std::unique_ptr<StmtNode> Parser::parse_expr_stmt() {
     auto expr = parse_expression();
     consume(TokenKind::SemiColon);
-    return std::make_unique<ExprStmt>(std::move(expr));
+    return std::make_unique<ExprStmt>(std::move(expr), expr->get_line());
 }
 
 std::unique_ptr<ExprNode> Parser::nud(Token token) {
     switch (token.kind) {
         case TokenKind::NumLiteral:
             advance();
-            return std::make_unique<NumLitNode>(NumLitNode(token));
+            return std::make_unique<NumLitNode>(token, token.line);
         case TokenKind::LeftParen: {
-            advance();  // Consume '('
+            size_t line = advance().line;  // Consume '('
             auto expr = parse_expression();
             consume(TokenKind::RightParen);
-            return std::make_unique<GroupingExpr>(GroupingExpr(std::move(expr)));
+            return std::make_unique<GroupingExpr>(std::move(expr), line);
         }
         case TokenKind::Identifier: {
             Token id = advance();
@@ -309,18 +310,18 @@ std::unique_ptr<ExprNode> Parser::nud(Token token) {
                 auto fncall = parse_fncall(id);
                 return fncall;
             }
-            return std::make_unique<IdentifierNode>(IdentifierNode(id));
+            return std::make_unique<IdentifierNode>(id, id.line);
         }
         case TokenKind::True:
         case TokenKind::False:
             advance();
-            return std::make_unique<BooleanLiteral>(token);
+            return std::make_unique<BooleanLiteral>(token, token.line);
         case TokenKind::Not:
         case TokenKind::Minus: {
             Token op = advance();
             int unary_prec = 100;
             auto right = parse_expression(100);
-            return std::make_unique<UnaryNode>(op, std::move(right));
+            return std::make_unique<UnaryNode>(op, std::move(right), op.line);
         }
         default:
             throw SyntaxError("Expected an expression", peek().line);
@@ -333,7 +334,7 @@ std::unique_ptr<ExprNode> Parser::led(Token op, std::unique_ptr<ExprNode> left) 
     int next_prec = (assoc == Assoc::Left) ? prec : prec - 1;
 
     auto right = parse_expression(next_prec);
-    return std::make_unique<BinaryExpr>(BinaryExpr(op, std::move(left), std::move(right)));
+    return std::make_unique<BinaryExpr>(op, std::move(left), std::move(right), op.line);
 }
 
 void Parser::synchronize() {

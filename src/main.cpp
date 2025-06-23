@@ -31,13 +31,15 @@ void run(const std::string& source) {
 
     Parser parser(std::move(tokens));
     auto statements = parser.parse();
-    for (auto& statement : statements) {
-        statement->print();
-        std::cout << "\n";
-    }
+    // for (auto& statement : statements) {
+    //     statement->print();
+    //     std::cout << "\n";
+    // }
 
     SemanticAnalyzer analyzer(statements);
-    analyzer.analyze();
+    if (analyzer.analyze()) {
+        // TODO: CodeGen
+    }
 }
 
 

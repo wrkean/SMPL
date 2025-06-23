@@ -3,7 +3,6 @@
 #include "smpl/types.hpp"
 #include <cstdint>
 #include <string>
-#include <system_error>
 #include <unordered_map>
 
 static std::unordered_map<std::string, SmplType> type_table = {
@@ -15,6 +14,8 @@ static std::unordered_map<std::string, SmplType> type_table = {
     {"u32", SmplType::Uint32},
     {"i64", SmplType::Int64},
     {"u64", SmplType::Uint64},
+    {"int", SmplType::Int},
+    {"uint", SmplType::Uint},
     {"f32", SmplType::Float32},
     {"f64", SmplType::Float64},
     {"bool", SmplType::Boolean},
