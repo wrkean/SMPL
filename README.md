@@ -20,7 +20,7 @@ Run the executable with the command
 // two parameters of type i32, and should also return
 // a value of type i32
 defn pow(base: i32, exp: i32) -> i32 {
-    let result: i32 = 2;
+    let result: i32 = 0;
 
     // Range-based for loop
     for i in 0..exp {
