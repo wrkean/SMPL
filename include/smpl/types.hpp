@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 enum class SmplType {
     Int8,
     Int16,
@@ -12,9 +11,11 @@ enum class SmplType {
     Uint32,
     Uint64,
     Uint,
+    UntypedInt,
 
     Float32,
     Float64,
+    UntypedFloat,
 
     Boolean,
 
@@ -22,8 +23,6 @@ enum class SmplType {
     Char,
 
     Void,
-    UntypedInt,
-    UntypedFloat,
     Range,
     Unknown,
 };

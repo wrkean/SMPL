@@ -6,6 +6,7 @@
 #include "ast/expr/grouping.hpp"
 #include "ast/expr/identifier.hpp"
 #include "ast/expr/num_literal.hpp"
+#include "ast/expr/type.hpp"
 #include "ast/expr/unary.hpp"
 #include "ast/stmt/assignment.hpp"
 #include "ast/stmt/block.hpp"
@@ -24,7 +25,6 @@
 #include "token/tokenkind.hpp"
 #include <cstdlib>
 #include <format>
-#include <iostream>
 #include <magic_enum/magic_enum.hpp>
 #include <memory>
 #include <sstream>
@@ -40,9 +40,9 @@ SemanticAnalyzer::SemanticAnalyzer(std::vector<std::unique_ptr<StmtNode>>& progr
 bool SemanticAnalyzer::declare_symbol(const std::string& name, Symbol symbol) {
     if (symbol_table.empty()) throw CompilerError("No scope available for declaration", symbol.token.line);
     if (symbol_table.back().contains(name)) return false;   // Cant declare, already declared
-    //
+
     try {
-        TypeChecker::str_to_type(name, symbol.token.line);
+        tc::str_to_type(name, symbol.token.line);
     } catch (...) {
         symbol_table.back().emplace(name, symbol);
         return true;
@@ -88,11 +88,11 @@ void SemanticAnalyzer::analyze_stmt(std::unique_ptr<StmtNode>& stmt) {
     switch (stmt->get_kind()) {
         case StmtASTKind::Assignment: {
             AssignmentNode* assignment = dynamic_cast<AssignmentNode*>(stmt.get());
-            SmplType ass_type = TypeChecker::str_to_type(assignment->var_type.lexeme, stmt->get_line());
+            SmplType ass_type = tc::str_to_type(assignment->var_type.lexeme, stmt->get_line());
             SmplType right_type = analyze_expr(assignment->right);
             //       ^^^ as in assignment
             // TODO: Better error report
-            if (!TypeChecker::are_assign_compatible(ass_type, right_type)) {
+            if (!tc::are_assign_compatible(ass_type, right_type)) {
                 std::ostringstream left_type_str;
                 std::ostringstream right_type_str;
                 left_type_str << magic_enum::enum_name(ass_type);
@@ -100,9 +100,9 @@ void SemanticAnalyzer::analyze_stmt(std::unique_ptr<StmtNode>& stmt) {
                 throw TypeError(std::format("Incompatible types for assignment: {} to {}", right_type_str.str(), left_type_str.str()), stmt->get_line());
             } else {
                 if (auto* numlit = dynamic_cast<NumLitNode*>(assignment->right.get())) {
-                    if (!TypeChecker::fits_in_type(ass_type, numlit->literal.lexeme)) {
+                    if (!tc::fits_in_type(ass_type, numlit->literal.lexeme)) {
                         // TODO: Better error messages
-                        throw CompilerError("An overflow occured", numlit->get_line());
+                        throw CompilerError("An overflow will occur here", numlit->get_line());
                     }
                 }
             }
@@ -125,20 +125,26 @@ void SemanticAnalyzer::analyze_stmt(std::unique_ptr<StmtNode>& stmt) {
         case StmtASTKind::FnDecl: {
             DefnNode* defn = dynamic_cast<DefnNode*>(stmt.get());
             SmplType return_type = SmplType::Void;
+
+            try {
             if (defn->return_type.has_value()) {
-                return_type = TypeChecker::str_to_type(defn->return_type->lexeme, defn->get_line());
+                return_type = tc::str_to_type(defn->return_type->lexeme, defn->get_line());
             }
             cur_func_return_type = return_type;
 
             std::vector<SmplType> param_types;
             ParamNode* param_node = dynamic_cast<ParamNode*>(defn->params.get());
             for (auto& param : param_node->params) {
-                SmplType param_type = TypeChecker::str_to_type(param.second.lexeme, param_node->get_line());
+                SmplType param_type = tc::str_to_type(param.second.lexeme, param_node->get_line());
                 param_types.push_back(param_type);
             }
 
             if (!declare_symbol(defn->identifier.lexeme, Symbol(return_type, param_types, defn->identifier))) {
                 throw CompilerError(std::format("{} is already defined", defn->identifier.lexeme), defn->get_line());
+            }
+            } catch (const CompilerError& err) {
+                Smpl::error(err.line_number, err.what());
+                return;
             }
 
             enter_scope();
@@ -167,20 +173,21 @@ void SemanticAnalyzer::analyze_stmt(std::unique_ptr<StmtNode>& stmt) {
         case StmtASTKind::Param: {
             ParamNode* param = dynamic_cast<ParamNode*>(stmt.get());
             for (auto& param_ : param->params) {
-                SmplType type = TypeChecker::str_to_type(param_.second.lexeme, param->get_line());
+                SmplType type = tc::str_to_type(param_.second.lexeme, param->get_line());
                 declare_symbol(param_.first.lexeme, Symbol(type, param_.first));
             }
         } break;
         case StmtASTKind::Return: {
             ReturnNode* return_node = dynamic_cast<ReturnNode*>(stmt.get());
-            SmplType return_type = analyze_expr(return_node->return_expr);
-            if (!TypeChecker::are_assign_compatible(cur_func_return_type, return_type)) {
-                if (auto* numlit = dynamic_cast<NumLitNode*>(return_node->return_expr.get())) {
-                    if (!TypeChecker::fits_in_type(return_type, numlit->literal.lexeme)) {
-                        throw CompilerError("An overflow occured", numlit->get_line());
-                    }
-                }
-                throw TypeError("Expression type does not match the function's return type", return_node->return_expr->get_line());
+            SmplType return_type = SmplType::Void;
+            if (return_node->return_expr != nullptr) {
+                return_type = analyze_expr(return_node->return_expr);
+            }
+
+            if (!tc::are_assign_compatible(cur_func_return_type, return_type)) {
+                if (return_node->return_expr != nullptr)
+                    throw TypeError("Expression type does not match the function's return type", return_node->return_expr->get_line());
+                throw TypeError("Function expects a return value, returned 'void' instead", return_node->get_line());
             }
         } break;
         case StmtASTKind::While: {
@@ -197,15 +204,15 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
             BinaryExpr* binary = dynamic_cast<BinaryExpr*>(expr.get());
             SmplType left_type = analyze_expr(binary->left);
             SmplType right_type = analyze_expr(binary->right);
+            std::ostringstream left_type_str, right_type_str, op_str;
+            left_type_str << magic_enum::enum_name(left_type);
+            right_type_str << magic_enum::enum_name(right_type);
 
-            if (!TypeChecker::are_binary_compatible(left_type, right_type)) {
+            if (!tc::are_binary_compatible(left_type, right_type)) {
                 if (binary->op.kind == TokenKind::As) {
                     // Except for as operator, we go out of the if statement
                     goto escape;
                 }
-                std::ostringstream left_type_str, right_type_str, op_str;
-                left_type_str << magic_enum::enum_name(left_type);
-                right_type_str << magic_enum::enum_name(right_type);
                 op_str << magic_enum::enum_name(binary->op.kind);
                 throw TypeError(std::format("Incompatible types for binary operation: {} <{}> {}", left_type_str.str(), op_str.str(), right_type_str.str()), binary->get_line());
             }
@@ -234,12 +241,14 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
                 case TokenKind::Or:
                     return SmplType::Boolean;
 
-                case TokenKind::As:
-                    // if (auto* id = dynamic_cast<IdentifierNode*>(binary->right.get())) {
-                    //     return TypeChecker::str_to_type(id->identifier.lexeme, id->get_line());
-                    // }
-                    // throw CompilerError("Expected an identifier after 'as'", binary->right->get_line());
-                    return right_type;
+                case TokenKind::As: {
+                    if (binary->right->get_kind() != ExprASTKind::Type)
+                        throw CompilerError("Expected a type for right hand operand for 'as' opeprator", binary->right->get_line());
+                    if (tc::is_castable(left_type, right_type)) {
+                        return right_type;
+                    }
+                    throw TypeError(std::format("Invalid cast from {} to {}", left_type_str.str(), right_type_str.str()), binary->op.line);
+                }
 
                 case TokenKind::Range:
                     return SmplType::Range;
@@ -265,7 +274,7 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
             auto& param_types = fndecl->param_types;
             auto& args = fncall->args;
             for (int i = 0; i < args.size(); i++) {
-                if (!TypeChecker::are_assign_compatible(param_types[i], analyze_expr(args[i]))) {
+                if (!tc::are_assign_compatible(param_types[i], analyze_expr(args[i]))) {
                     // TODO: Better error message
                     throw CompilerError("Incompatible types", fncall->get_line());
                 }
@@ -279,18 +288,16 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
         }
         case ExprASTKind::Identifier: {
             IdentifierNode* identifier = dynamic_cast<IdentifierNode*>(expr.get());
-            SmplType type;
-            try {
-                type = TypeChecker::str_to_type(identifier->identifier.lexeme, identifier->get_line());
-            } catch (...) {
-                Symbol* variable = lookup(identifier->identifier.lexeme);
-                if (!variable) {
-                    throw CompilerError(std::format("{} is not defined", identifier->identifier.lexeme), identifier->get_line());
-                }
-
-                return variable->type;
+            Symbol* variable = lookup(identifier->identifier.lexeme);
+            if (!variable) {
+                throw CompilerError(std::format("{} is not defined", identifier->identifier.lexeme), identifier->get_line());
             }
-            return type;
+
+            return variable->type;
+        }
+        case ExprASTKind::Type: {
+            TypeNode* type_node = dynamic_cast<TypeNode*>(expr.get());
+            return tc::str_to_type(type_node->type.lexeme, type_node->get_line());
         }
         case ExprASTKind::NumberLiteral: {
             NumLitNode* numlit = dynamic_cast<NumLitNode*>(expr.get());
@@ -306,7 +313,7 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
                     }
                     return SmplType::Boolean;
                 case TokenKind::Minus: {
-                    if (!TypeChecker::is_numeric(right_type)) {
+                    if (!tc::is_numeric(right_type)) {
                         throw TypeError("Negation '-' operator only accepts numeric values as an operand", unary->get_line());
                     }
                     return right_type;

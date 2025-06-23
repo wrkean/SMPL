@@ -6,6 +6,7 @@
 #include "ast/expr/grouping.hpp"
 #include "ast/expr/identifier.hpp"
 #include "ast/expr/num_literal.hpp"
+#include "ast/expr/type.hpp"
 #include "ast/expr/unary.hpp"
 #include "ast/stmt/assignment.hpp"
 #include "ast/stmt/block.hpp"
@@ -123,6 +124,8 @@ std::unique_ptr<StmtNode> Parser::parse_statement() {
             return parse_if();
         case TokenKind::While:
             return parse_while();
+        case TokenKind::LeftBrace:
+            return parse_block();
         case TokenKind::Identifier:
         case TokenKind::NumLiteral:
         case TokenKind::True:
@@ -139,6 +142,7 @@ std::unique_ptr<StmtNode> Parser::parse_statement() {
 std::unique_ptr<StmtNode> Parser::parse_fndecl() {
     size_t line = consume(TokenKind::Defn).line;
     Token identifier = consume(TokenKind::Identifier);
+    bool is_main = identifier.lexeme == "main";
 
     auto params = parse_params();
 
@@ -146,9 +150,12 @@ std::unique_ptr<StmtNode> Parser::parse_fndecl() {
     std::optional<Token> return_type;
     if (peek().kind == TokenKind::ThinArrow) {
         advance();      // Consume '->'
-        return_type = consume(TokenKind::Identifier);
-    } else if (peek().kind != TokenKind::LeftBrace) {
+        return_type = consume(TokenKind::Type);
+    } else if (!is_main && peek().kind != TokenKind::LeftBrace) {
         throw SyntaxError("Expected block{} or '->'", peek().line);
+    } else if (is_main) {
+        Token implicit_type(TokenKind::Type, "int", peek().line);
+        return_type = implicit_type;
     }
 
     auto block = parse_block();
@@ -160,13 +167,8 @@ std::unique_ptr<StmtNode> Parser::parse_block() {
     std::vector<std::unique_ptr<StmtNode>> statements;
 
     while (peek().kind != TokenKind::RightBrace) {
-        try {
-            auto stmt = parse_statement();
-            if (stmt) statements.push_back(std::move(stmt));
-        } catch (const CompilerError& err) {
-            Smpl::error(peek().line, err.what());
-            synchronize();
-        }
+        auto stmt = parse_statement();
+        if (stmt) statements.push_back(std::move(stmt));
     }
     consume(TokenKind::RightBrace);
     return std::make_unique<BlockNode>(std::move(statements), line);
@@ -180,7 +182,7 @@ std::unique_ptr<StmtNode> Parser::parse_params() {
         Token param_id = consume(TokenKind::Identifier);
         consume(TokenKind::Colon);
 
-        Token param_type = consume(TokenKind::Identifier);
+        Token param_type = consume(TokenKind::Type);
         params.emplace_back(param_id, param_type);
 
         if (peek().kind == TokenKind::Comma) {
@@ -198,7 +200,7 @@ std::unique_ptr<StmtNode> Parser::parse_assignment() {
     Token identifier = consume(TokenKind::Identifier);
 
     consume(TokenKind::Colon);
-    Token type = consume(TokenKind::Identifier);
+    Token type = consume(TokenKind::Type);
 
     consume(TokenKind::Equal);
     auto right = parse_expression();
@@ -209,7 +211,11 @@ std::unique_ptr<StmtNode> Parser::parse_assignment() {
 
 std::unique_ptr<StmtNode> Parser::parse_return() {
     size_t line = consume(TokenKind::Return).line;
-    auto expr = parse_expression();
+    std::unique_ptr<ExprNode> expr = nullptr;
+    if (peek().kind != TokenKind::SemiColon) {
+        expr = parse_expression();
+    }
+
     consume(TokenKind::SemiColon);
     return std::make_unique<ReturnNode>(std::move(expr), line);
 }
@@ -304,14 +310,13 @@ std::unique_ptr<ExprNode> Parser::nud(Token token) {
             consume(TokenKind::RightParen);
             return std::make_unique<GroupingExpr>(std::move(expr), line);
         }
-        case TokenKind::Identifier: {
-            Token id = advance();
+        case TokenKind::Identifier:
+            advance();
             if (peek().kind == TokenKind::LeftParen) {
-                auto fncall = parse_fncall(id);
+                auto fncall = parse_fncall(token);
                 return fncall;
             }
-            return std::make_unique<IdentifierNode>(id, id.line);
-        }
+            return std::make_unique<IdentifierNode>(token, token.line);
         case TokenKind::True:
         case TokenKind::False:
             advance();
@@ -323,6 +328,9 @@ std::unique_ptr<ExprNode> Parser::nud(Token token) {
             auto right = parse_expression(100);
             return std::make_unique<UnaryNode>(op, std::move(right), op.line);
         }
+        case TokenKind::Type:
+            advance();
+            return std::make_unique<TypeNode>(token, token.line);
         default:
             throw SyntaxError("Expected an expression", peek().line);
     }
@@ -338,10 +346,14 @@ std::unique_ptr<ExprNode> Parser::led(Token op, std::unique_ptr<ExprNode> left) 
 }
 
 void Parser::synchronize() {
-    advance();  // Consume erroneous token
+    // Always consume at least one token to avoid infinite loop
+    advance();
 
     while (!at_end()) {
-        if (previous().kind == TokenKind::SemiColon) return;
+        if (previous().kind == TokenKind::SemiColon ||
+            previous().kind == TokenKind::RightBrace) {
+            return;
+        }
 
         switch (peek().kind) {
             case TokenKind::Defn:
@@ -349,11 +361,11 @@ void Parser::synchronize() {
             case TokenKind::Return:
             case TokenKind::If:
             case TokenKind::While:
-                return;
-            default:    // Only cancels warning (Unhandled enum values)
+            case TokenKind::For:
+                return;  // Likely start of a new statement
+            default:
+                advance();  // Keep scanning forward
         }
-
-        advance();
     }
 }
 

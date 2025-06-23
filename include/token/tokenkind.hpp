@@ -54,6 +54,7 @@ enum class TokenKind {
     TildeEqual,
 
     Identifier,
+    Type,
     NumLiteral,
     StringLiteral,
     CharLiteral,
