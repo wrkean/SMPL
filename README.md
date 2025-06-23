@@ -2,8 +2,6 @@
 SMPL will be compiled down to C, which is then again compiled down to machine code by clang.
 This project has not been finished yet and won't be supporting OOP until the language is capable of doing tasks using the FP paradigm.
 
-> The compiler parser's print() function is pretty ugly, I am focusing on parsing for now and will later make printing more pretty
-
 # Goal
 SMPL aims to be as simple as possible, much like C but with more type-safety and other safety features.
 # Example Code
@@ -12,7 +10,7 @@ SMPL aims to be as simple as possible, much like C but with more type-safety and
 // two parameters of type i32, and should also return
 // a value of type i32
 defn pow(base: i32, exp: i32) -> i32 {
-    let result: i32 = 1;
+    let result: i32 = 2;
 
     // Range-based for loop
     for i in 0..exp {
@@ -22,15 +20,14 @@ defn pow(base: i32, exp: i32) -> i32 {
     return result;
 }
 
+// Main implicitly has a return type of int
 defn main() {
-    let x: i32 = 12;
+    let x: i32 = 1;
     let y: i32 = x = 64;
-    let z: i32 = pow(x, y);  // FIXME: Overflow alert. But it's okay, we're not executing anything
+    let z: i32 = pow(x, y);
 
     // While loop
     while true {
-        let some: i32 = true; // Nope. Won't compile. bool and i32 are not assignable. Unless you typecast with the `as` operator, shown below
-        let boot_to_i32: i32 = true as i32; // Should evaluate to 1
     }
 
     if false == not true {
@@ -42,23 +39,15 @@ defn main() {
     true;
     pow(x, y);
     not true; // False
+
+    return 0;
 }
 ```
 # Progress
-- 🟢 Lexical analysis done (I think). It's just a matter of expanding now.
-- Parser can now parse:
-    - if statements
-    - while statements
-    - for statements
-    - return statements
-    - function definitions
-    - assignment statements
-    - expression statements
-    - unary expression (only `not` `<expr>` and -`<expr>`)
-    - binary expression
-    - function calls
-    - boolean expressions (including relational expressions)
-- ❌ Semantic Analysis
+- 🟢 Lexical analysis done (Lexing). It's just a matter of expanding now.
+- 🟢 Syntax analysis (Parsing) done for now. Will expand later.
+- 🟡 Semantic Analysis done, but needs better error messages.
+- ❌ Code generation. Given a no-error AST, turns it into an equivalent and valid C program
 
 # Primitive Types
 An integer's name can be composed of its signedness and its bit-width. For example, i32 means it is a signed 32-bit integer and u32 means it is an unsigned 32-bit integer.
