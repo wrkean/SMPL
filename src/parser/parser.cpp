@@ -20,13 +20,13 @@
 #include "ast/stmt/stmt.hpp"
 #include "ast/stmt/while.hpp"
 #include "error_reporter/compiler_err.hpp"
+#include "magic_enum.hpp"
 #include "smpl/smpl.hpp"
 #include "token/token.hpp"
 #include "token/tokenkind.hpp"
 #include <cstddef>
 #include <format>
 #include <initializer_list>
-#include <magic_enum/magic_enum.hpp>
 #include <memory>
 #include <optional>
 #include <sstream>
