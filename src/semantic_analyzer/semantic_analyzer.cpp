@@ -18,6 +18,7 @@
 #include "ast/stmt/return.hpp"
 #include "ast/stmt/while.hpp"
 #include "error_reporter/compiler_err.hpp"
+#include "magic_enum.hpp"
 #include "smpl/smpl.hpp"
 #include "smpl/symbol.hpp"
 #include "smpl/type_checker.hpp"
@@ -25,7 +26,6 @@
 #include "token/tokenkind.hpp"
 #include <cstdlib>
 #include <format>
-#include <magic_enum/magic_enum.hpp>
 #include <memory>
 #include <sstream>
 #include <string>

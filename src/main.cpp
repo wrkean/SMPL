@@ -5,8 +5,7 @@
 #include <iostream>
 #include <sstream>
 
-// External library
-#include <magic_enum/magic_enum.hpp>
+#include "magic_enum.hpp"
 
 std::string file_to_strbuf(const std::string& path) {
     std::ifstream source(path);
