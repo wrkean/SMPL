@@ -130,19 +130,11 @@ namespace tc {
     }
 
     bool is_castable(SmplType from, SmplType to) {
-        // int as int
-        if (is_integer(from) && is_integer(to)) return true;
+        if (is_numeric(from) && is_numeric(to)) return true;
 
-        // float as float
-        if (is_floating(from) && is_floating(to)) return true;
+        if (from == SmplType::Boolean && is_numeric(to)) return true;
 
-        // bool as int
-        if (from == SmplType::Boolean && is_integer(to)) return true;
-
-        // int/float as bool
         if (is_numeric(from) && to == SmplType::Boolean) return true;
-
-        if (from == to) return true;    // Of course
 
         return false;
     }

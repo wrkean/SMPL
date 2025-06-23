@@ -32,7 +32,7 @@ std::vector<Token>& Lexer::lex() {
         lex_token();
     }
 
-    add_token(TokenKind::Eof);
+    add_token(TokenKind::Eof, "EOF");
     return tokens;
 }
 

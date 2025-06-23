@@ -347,7 +347,7 @@ std::unique_ptr<ExprNode> Parser::led(Token op, std::unique_ptr<ExprNode> left) 
 
 void Parser::synchronize() {
     // Always consume at least one token to avoid infinite loop
-    advance();
+    if (!at_end()) advance();
 
     while (!at_end()) {
         if (previous().kind == TokenKind::SemiColon ||
