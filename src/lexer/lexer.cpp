@@ -1,5 +1,6 @@
 #include "lexer/lexer.hpp"
 #include "error_reporter/compiler_err.hpp"
+#include "smpl/type_checker.hpp"
 #include "token/tokenkind.hpp"
 #include <cctype>
 #include <format>
@@ -224,6 +225,9 @@ void Lexer::lex_identifier() {
 
     if (keywords.contains(id)) {
         add_token(keywords.at(id));
+        return;
+    } else if (tc::is_type(id)) {
+        add_token(TokenKind::Type);
         return;
     }
 

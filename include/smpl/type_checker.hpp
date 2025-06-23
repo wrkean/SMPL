@@ -3,14 +3,17 @@
 #include "smpl/types.hpp"
 // #include <cstdint>    TODO: CLEAN
 #include <string>
-class TypeChecker {
-public:
-    static bool is_integer(SmplType type);
-    static bool is_floating(SmplType type);
-    static bool is_numeric(SmplType type);
-    static bool are_assign_compatible(SmplType left, SmplType right);
-    static bool are_binary_compatible(SmplType left, SmplType right);
-    static bool fits_in_type(SmplType type, const std::string& literal);
-    // static SmplType promote(SmplType a, SmplType b, int64_t line_number);
-    static SmplType str_to_type(const std::string& type_str, size_t line_number);
+#include <unordered_map>
+
+namespace tc {
+    extern std::unordered_map<std::string, SmplType> type_table;
+    bool is_integer(SmplType type);
+    bool is_floating(SmplType type);
+    bool is_numeric(SmplType type);
+    bool are_assign_compatible(SmplType left, SmplType right);
+    bool are_binary_compatible(SmplType left, SmplType right);
+    bool fits_in_type(SmplType type, const std::string& literal);
+    bool is_type(const std::string& name);
+    bool is_castable(SmplType from, SmplType to);
+    SmplType str_to_type(const std::string& type_str, size_t line_number);
 };
