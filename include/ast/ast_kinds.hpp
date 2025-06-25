@@ -9,6 +9,7 @@ enum class ExprASTKind {
     Identifier,
     NumberLiteral,
     Type,
+    CondExpr,
 };
 
 enum class StmtASTKind {

@@ -1,6 +1,7 @@
 #include "semantic_analyzer/semantic_analyzer.hpp"
 #include "ast/ast_kinds.hpp"
 #include "ast/expr/binary.hpp"
+#include "ast/expr/cond_expr.hpp"
 #include "ast/expr/expr.hpp"
 #include "ast/expr/fncall.hpp"
 #include "ast/expr/grouping.hpp"
@@ -321,6 +322,20 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
                 default:
                     throw CompilerError("Invalid operator for unary expression", unary->get_line());
             }
+        }
+        case ExprASTKind::CondExpr: {
+            CondExprNode* cond_expr = dynamic_cast<CondExprNode*>(expr.get());
+
+            auto if_val_type = analyze_expr(cond_expr->if_val);
+            auto if_expr_type = analyze_expr(cond_expr->if_expr);
+            auto else_val_type = analyze_expr(cond_expr->else_val);
+
+            if (if_expr_type != SmplType::Boolean)
+                throw TypeError("Condition after if must be a boolean expression", cond_expr->if_expr->get_line());
+            if (if_val_type != else_val_type)
+                throw TypeError("Default value and the else value must be the same type", cond_expr->get_line());
+
+            return if_val_type;
         }
     }
 }

@@ -1,6 +1,7 @@
 #include "parser/parser.hpp"
 #include "ast/expr/binary.hpp"
 #include "ast/expr/boolean_literal.hpp"
+#include "ast/expr/cond_expr.hpp"
 #include "ast/expr/expr.hpp"
 #include "ast/expr/fncall.hpp"
 #include "ast/expr/grouping.hpp"
@@ -265,18 +266,6 @@ std::unique_ptr<StmtNode> Parser::parse_while() {
     return std::make_unique<WhileNode>(std::move(cond), std::move(block), line);
 }
 
-std::unique_ptr<ExprNode> Parser::parse_expression(int prec) {
-    auto left = nud(peek());
-
-    while (!at_end() && get_precedence(peek()) > prec) {
-        Token op = peek();
-        advance();
-        left = led(op, std::move(left));
-    }
-
-    return left;
-}
-
 std::unique_ptr<ExprNode> Parser::parse_fncall(Token id) {
     std::vector<std::unique_ptr<ExprNode>> args;
     consume(TokenKind::LeftParen);
@@ -297,6 +286,36 @@ std::unique_ptr<StmtNode> Parser::parse_expr_stmt() {
     auto expr = parse_expression();
     consume(TokenKind::SemiColon);
     return std::make_unique<ExprStmt>(std::move(expr), expr->get_line());
+}
+
+std::unique_ptr<ExprNode> Parser::parse_conditional_expr(std::unique_ptr<ExprNode> if_val) {
+    size_t line = consume(TokenKind::If).line;
+    auto if_expr = parse_expression();
+    consume(TokenKind::Else);
+    auto else_expr = parse_expression();
+
+    return std::make_unique<CondExprNode>(std::move(if_val), std::move(if_expr), std::move(else_expr), line);
+}
+
+std::unique_ptr<ExprNode> Parser::parse_expression(int prec) {
+    auto left = nud(peek());
+
+    while (!at_end()) {
+        // Detects an if after the expression to parse it as a
+        // conditional expression
+        if (peek().kind == TokenKind::If && prec < 1) {
+            left = parse_conditional_expr(std::move(left));
+            continue;
+        }
+
+        if (get_precedence(peek()) <= prec) break;
+
+        Token op = peek();
+        advance();
+        left = led(op, std::move(left));
+    }
+
+    return left;
 }
 
 std::unique_ptr<ExprNode> Parser::nud(Token token) {

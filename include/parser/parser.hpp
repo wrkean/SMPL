@@ -43,6 +43,7 @@ private:
     // Expressions
     std::unique_ptr<ExprNode> parse_expression(int prec = 0);
     std::unique_ptr<ExprNode> parse_fncall(Token id);
+    std::unique_ptr<ExprNode> parse_conditional_expr(std::unique_ptr<ExprNode> if_val);
 
     // Helper methods
     std::unique_ptr<ExprNode> nud(Token token);
