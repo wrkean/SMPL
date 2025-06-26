@@ -20,7 +20,8 @@ namespace tc {
         {"f32", SmplType::Float32},
         {"f64", SmplType::Float64},
         {"bool", SmplType::Boolean},
-        {"char", SmplType::Char}
+        {"char", SmplType::Char},
+        {"str", SmplType::String},
     };
 
     bool is_integer(SmplType type) {

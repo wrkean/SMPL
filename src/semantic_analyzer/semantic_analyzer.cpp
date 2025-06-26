@@ -337,5 +337,6 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
 
             return if_val_type;
         }
+        case ExprASTKind::StringLiteral: return SmplType::String;
     }
 }

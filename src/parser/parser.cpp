@@ -7,6 +7,7 @@
 #include "ast/expr/grouping.hpp"
 #include "ast/expr/identifier.hpp"
 #include "ast/expr/num_literal.hpp"
+#include "ast/expr/string_literal.hpp"
 #include "ast/expr/type.hpp"
 #include "ast/expr/unary.hpp"
 #include "ast/stmt/assignment.hpp"
@@ -350,6 +351,9 @@ std::unique_ptr<ExprNode> Parser::nud(Token token) {
         case TokenKind::Type:
             advance();
             return std::make_unique<TypeNode>(token, token.line);
+        case TokenKind::StringLiteral:
+            advance();
+            return std::make_unique<StringLiteral>(token, token.line);
         default:
             throw SyntaxError("Expected an expression", peek().line);
     }

@@ -212,6 +212,8 @@ void Lexer::lex_string() {
         throw LexicalError(std::format("[{}]: Unterminated string literal", line), line);
     }
 
+    advance(); // Consume closing quote
+
     std::string lexeme = source.substr(start + 1, current - start - 1);
     add_token(TokenKind::StringLiteral, lexeme);
 }

@@ -8,6 +8,7 @@ enum class ExprASTKind {
     Grouping,
     Identifier,
     NumberLiteral,
+    StringLiteral,
     Type,
     CondExpr,
 };
