@@ -21,7 +21,9 @@
 #include "error_reporter/compiler_err.hpp"
 #include "magic_enum.hpp"
 #include "smpl/smpl.hpp"
-#include "smpl/symbol.hpp"
+#include "smpl/symbol/func_symbol.hpp"
+#include "smpl/symbol/symbol.hpp"
+#include "smpl/symbol/var_symbol.hpp"
 #include "smpl/type_checker.hpp"
 #include "smpl/types.hpp"
 #include "token/tokenkind.hpp"
@@ -34,28 +36,27 @@
 #include <vector>
 
 // TODO: Finish and clean these up
-
 SemanticAnalyzer::SemanticAnalyzer(std::vector<std::unique_ptr<StmtNode>>& program)
     : program(program), cur_func_return_type(SmplType::Unknown) { };
 
-bool SemanticAnalyzer::declare_symbol(const std::string& name, Symbol symbol) {
-    if (symbol_table.empty()) throw CompilerError("No scope available for declaration", symbol.token.line);
+bool SemanticAnalyzer::declare_symbol(const std::string& name, std::unique_ptr<Symbol> symbol) {
+    if (symbol_table.empty()) throw CompilerError("No scope available for declaration", symbol->get_token().line);
     if (symbol_table.back().contains(name)) return false;   // Cant declare, already declared
 
     try {
-        tc::str_to_type(name, symbol.token.line);
+        tc::str_to_type(name, symbol->get_token().line);
     } catch (...) {
-        symbol_table.back().emplace(name, symbol);
+        symbol_table.back().emplace(name, std::move(symbol));
         return true;
     }
 
-    throw CompilerError(std::format("Cannot declare built-in primitive type name: {}", name), symbol.token.line);
+    throw CompilerError(std::format("Cannot declare built-in primitive type name: {}", name), symbol->get_token().line);
 }
 
 Symbol* SemanticAnalyzer::lookup(const std::string& name) {
     for (auto it = symbol_table.rbegin(); it != symbol_table.rend(); ++it) {
         if (it->contains(name)) {
-            return &it->at(name);
+            return it->at(name).get();
         }
     }
     return nullptr;
@@ -90,8 +91,8 @@ void SemanticAnalyzer::analyze_stmt(std::unique_ptr<StmtNode>& stmt) {
         case StmtASTKind::Assignment: {
             AssignmentNode* assignment = dynamic_cast<AssignmentNode*>(stmt.get());
             SmplType ass_type = tc::str_to_type(assignment->var_type.lexeme, stmt->get_line());
-            SmplType right_type = analyze_expr(assignment->right);
             //       ^^^ as in assignment
+            SmplType right_type = analyze_expr(assignment->right);
             // TODO: Better error report
             if (!tc::are_assign_compatible(ass_type, right_type)) {
                 std::ostringstream left_type_str;
@@ -107,7 +108,8 @@ void SemanticAnalyzer::analyze_stmt(std::unique_ptr<StmtNode>& stmt) {
                     }
                 }
             }
-            if (!declare_symbol(assignment->variable.lexeme, Symbol(ass_type, assignment->variable))) {
+            auto symbol = std::make_unique<VarSymbol>(ass_type, assignment->variable);
+            if (!declare_symbol(assignment->variable.lexeme, std::move(symbol))) {
                 throw CompilerError(std::format("{} already defined", assignment->variable.lexeme), stmt->get_line());
             }
         } break;
@@ -140,7 +142,8 @@ void SemanticAnalyzer::analyze_stmt(std::unique_ptr<StmtNode>& stmt) {
                 param_types.push_back(param_type);
             }
 
-            if (!declare_symbol(defn->identifier.lexeme, Symbol(return_type, param_types, defn->identifier))) {
+            auto symbol = std::make_unique<FuncSymbol>(return_type, param_types, defn->identifier);
+            if (!declare_symbol(defn->identifier.lexeme, std::move(symbol))) {
                 throw CompilerError(std::format("{} is already defined", defn->identifier.lexeme), defn->get_line());
             }
             } catch (const CompilerError& err) {
@@ -158,7 +161,8 @@ void SemanticAnalyzer::analyze_stmt(std::unique_ptr<StmtNode>& stmt) {
             ForNode* for_node = dynamic_cast<ForNode*>(stmt.get());
             SmplType type = analyze_expr(for_node->iterator);
             enter_scope();
-            declare_symbol(for_node->bind_var.lexeme, Symbol(type, for_node->bind_var));
+            auto symbol = std::make_unique<VarSymbol>(type, for_node->bind_var);
+            declare_symbol(for_node->bind_var.lexeme, std::move(symbol));
             analyze_stmt(for_node->block);
             exit_scope();
         } break;
@@ -175,7 +179,8 @@ void SemanticAnalyzer::analyze_stmt(std::unique_ptr<StmtNode>& stmt) {
             ParamNode* param = dynamic_cast<ParamNode*>(stmt.get());
             for (auto& param_ : param->params) {
                 SmplType type = tc::str_to_type(param_.second.lexeme, param->get_line());
-                declare_symbol(param_.first.lexeme, Symbol(type, param_.first));
+                auto symbol = std::make_unique<VarSymbol>(type, param_.first);
+                declare_symbol(param_.first.lexeme, std::move(symbol));
             }
         } break;
         case StmtASTKind::Return: {
@@ -266,13 +271,14 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
                 throw CompilerError(std::format("{} is not defined", fncall->identifier.lexeme), fncall->get_line());
             }
 
-            if (fncall->args.size() != fndecl->param_types.size()) {
+            auto fn_symbol = dynamic_cast<FuncSymbol*>(fndecl);
+            if (fncall->args.size() != fn_symbol->param_types.size()) {
                 throw CompilerError(std::format("Function call '{}' has {} arguments, expected {}",
-                                                        fncall->identifier.lexeme, fncall->args.size(), fndecl->param_types.size()),
+                                                        fncall->identifier.lexeme, fncall->args.size(), fn_symbol->param_types.size()),
                                     fncall->get_line());
             }
 
-            auto& param_types = fndecl->param_types;
+            auto& param_types = fn_symbol->param_types;
             auto& args = fncall->args;
             for (int i = 0; i < args.size(); i++) {
                 if (!tc::are_assign_compatible(param_types[i], analyze_expr(args[i]))) {
@@ -281,7 +287,7 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
                 }
             }
 
-            return fndecl->type;
+            return fn_symbol->return_type;
         }
         case ExprASTKind::Grouping: {
             GroupingExpr* group = dynamic_cast<GroupingExpr*>(expr.get());
@@ -294,7 +300,8 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
                 throw CompilerError(std::format("{} is not defined", identifier->identifier.lexeme), identifier->get_line());
             }
 
-            return variable->type;
+            auto var_symbol = dynamic_cast<VarSymbol*>(variable);
+            return var_symbol->type;
         }
         case ExprASTKind::Type: {
             TypeNode* type_node = dynamic_cast<TypeNode*>(expr.get());
