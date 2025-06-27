@@ -6,8 +6,6 @@
 #include <iostream>
 #include <sstream>
 
-#include "magic_enum.hpp"
-
 std::string file_to_strbuf(const std::string& path) {
     std::ifstream source(path);
     if (!source.is_open()) {
@@ -36,9 +34,9 @@ void generate_c(const std::string& source) {
     Lexer lexer(std::move(source)); // Lexer owns the source string
     auto& tokens = lexer.lex();
 
-    for (auto& token : tokens) {
-        std::cout << token.lexeme << " <=> " << magic_enum::enum_name(token.kind) << "\n";
-    }
+    // for (auto& token : tokens) {
+    //     std::cout << token.lexeme << " <=> " << magic_enum::enum_name(token.kind) << "\n";
+    // }
 
     Parser parser(std::move(tokens));
     auto statements = parser.parse();
