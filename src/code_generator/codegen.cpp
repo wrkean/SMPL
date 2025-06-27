@@ -263,7 +263,7 @@ std::string CodeGenerator::gen_fncall(FuncCallNode* fncall_node) {
                     result = std::format("printf(\"%f\", {})", gen_expression(fncall_node->args[0]));
                     break;
                 case SmplType::String:
-                    result = std::format("printf(\"%s\", {})", gen_expression(fncall_node->args[0]));
+                    result = std::format("printf(\"%s\", \"{}\")", gen_expression(fncall_node->args[0]));
                     break;
                 default:
             }
