@@ -16,6 +16,7 @@
 #include "ast/stmt/param.hpp"
 #include "semantic_analyzer/semantic_analyzer.hpp"
 #include "smpl/builtins.hpp"
+#include "smpl/type_checker.hpp"
 #include "smpl/types.hpp"
 #include "token/tokenkind.hpp"
 #include <format>
@@ -254,17 +255,24 @@ std::string CodeGenerator::gen_fncall(FuncCallNode* fncall_node) {
     switch (builtin::get_builtin(fncall_node->identifier.lexeme)) {
         case builtin::PrintFunc: {
             auto arg_type = fncall_node->args[0]->get_type();
-            switch (arg_type) {
-                case SmplType::Int:
-                    result = std::format("printf(\"%d\", {})", gen_expression(fncall_node->args[0]));
-                    break;
-                case SmplType::Float32:
-                    result = std::format("printf(\"%f\", {})", gen_expression(fncall_node->args[0]));
-                    break;
-                case SmplType::String:
-                    result = std::format("printf(\"%s\", \"{}\")", gen_expression(fncall_node->args[0]));
-                    break;
-                default:
+            // switch (arg_type) {
+            //     case SmplType::Int:
+            //         result = std::format("printf(\"%d\", {})", gen_expression(fncall_node->args[0]));
+            //         break;
+            //     case SmplType::Float32:
+            //         result = std::format("printf(\"%f\", {})", gen_expression(fncall_node->args[0]));
+            //         break;
+            //     case SmplType::String:
+            //         result = std::format("printf(\"%s\", \"{}\")", gen_expression(fncall_node->args[0]));
+            //         break;
+            //     default:
+            // }
+            if (tc::is_integer(arg_type)) {
+                result = std::format("printf(\"%d\", {})", gen_expression(fncall_node->args[0]));
+            } else if (tc::is_floating(arg_type)) {
+                result = std::format("printf(\"%f\", {})", gen_expression(fncall_node->args[0]));
+            } else if (arg_type == SmplType::String) {
+                result = std::format("printf(\"%s\", \"{}\")", gen_expression(fncall_node->args[0]));
             }
         } break;
         case builtin::None: {
