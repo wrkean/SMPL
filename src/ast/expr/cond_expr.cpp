@@ -1,5 +1,6 @@
 #include "ast/expr/cond_expr.hpp"
 #include "ast/ast_kinds.hpp"
+#include "smpl/types.hpp"
 #include <utility>
 
 CondExprNode::CondExprNode(std::unique_ptr<ExprNode> if_val,
@@ -10,7 +11,8 @@ CondExprNode::CondExprNode(std::unique_ptr<ExprNode> if_val,
     if_expr(std::move(if_expr)),
     else_val(std::move(else_val)),
     line(line),
-    kind(ExprASTKind::CondExpr) { }
+    kind(ExprASTKind::CondExpr),
+    type(SmplType::Unknown) { }
 
 void CondExprNode::print() const {
 

@@ -2,6 +2,7 @@
 
 #include "ast/ast_kinds.hpp"
 #include "ast/expr/expr.hpp"
+#include "smpl/types.hpp"
 #include "token/token.hpp"
 #include <memory>
 class UnaryNode : public ExprNode {
@@ -14,5 +15,6 @@ public:
     Token op;
     std::unique_ptr<ExprNode> right;
     ExprASTKind kind;
+    SmplType type;
     size_t line;
 };

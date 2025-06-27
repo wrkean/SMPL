@@ -2,6 +2,7 @@
 
 #include "ast/ast_kinds.hpp"
 #include "ast/expr/expr.hpp"
+#include "smpl/types.hpp"
 #include "token/token.hpp"
 #include <cstddef>
 
@@ -14,5 +15,6 @@ public:
 
     Token type;
     ExprASTKind kind;
+    SmplType smpl_type;
     size_t line;
 };

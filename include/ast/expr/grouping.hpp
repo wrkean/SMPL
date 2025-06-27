@@ -2,6 +2,7 @@
 
 #include "ast/ast_kinds.hpp"
 #include "ast/expr/expr.hpp"
+#include "smpl/types.hpp"
 #include <memory>
 
 class GroupingExpr : public ExprNode {
@@ -13,5 +14,6 @@ public:
 
     std::unique_ptr<ExprNode> expr;
     ExprASTKind kind;
+    SmplType type;
     size_t line;
 };

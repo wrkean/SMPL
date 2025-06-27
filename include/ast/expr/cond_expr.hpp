@@ -2,6 +2,7 @@
 
 #include "ast/ast_kinds.hpp"
 #include "ast/expr/expr.hpp"
+#include "smpl/types.hpp"
 #include <memory>
 
 class CondExprNode : public ExprNode {
@@ -18,5 +19,6 @@ public:
     std::unique_ptr<ExprNode> if_expr;
     std::unique_ptr<ExprNode> else_val;
     ExprASTKind kind;
+    SmplType type;
     size_t line;
 };

@@ -2,6 +2,7 @@
 
 #include "ast/ast_kinds.hpp"
 #include "ast/expr/expr.hpp"
+#include "smpl/types.hpp"
 #include "token/token.hpp"
 
 class BooleanLiteral : public ExprNode {
@@ -13,5 +14,6 @@ public:
 
     Token literal;
     ExprASTKind kind;
+    SmplType type;
     size_t line;
 };
