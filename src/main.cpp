@@ -1,3 +1,4 @@
+#include "code_generator/codegen.hpp"
 #include "lexer/lexer.hpp"
 #include "parser/parser.hpp"
 #include "semantic_analyzer/semantic_analyzer.hpp"
@@ -37,7 +38,8 @@ void run(const std::string& source) {
 
     SemanticAnalyzer analyzer(statements);
     if (analyzer.analyze()) {
-        // TODO: CodeGen
+        CodeGenerator codegen(statements, analyzer);
+        codegen.gen();
     }
 }
 
