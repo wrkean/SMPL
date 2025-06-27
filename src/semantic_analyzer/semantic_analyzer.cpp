@@ -172,6 +172,7 @@ void SemanticAnalyzer::analyze_stmt(std::unique_ptr<StmtNode>& stmt) {
         case StmtASTKind::For: {
             ForNode* for_node = dynamic_cast<ForNode*>(stmt.get());
             SmplType type = analyze_expr(for_node->iterator);
+            if (type == SmplType::Range) type = SmplType::Int;
             enter_scope();
             auto symbol = std::make_unique<VarSymbol>(type, for_node->bind_var);
             declare_symbol(for_node->bind_var.lexeme, std::move(symbol));
@@ -221,7 +222,9 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
         case ExprASTKind::Binary: {
             BinaryExpr* binary = dynamic_cast<BinaryExpr*>(expr.get());
             SmplType left_type = analyze_expr(binary->left);
+            binary->left->type = left_type;
             SmplType right_type = analyze_expr(binary->right);
+            binary->right->type = right_type;
             std::ostringstream left_type_str, right_type_str, op_str;
             left_type_str << magic_enum::enum_name(left_type);
             right_type_str << magic_enum::enum_name(right_type);
@@ -246,8 +249,10 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
                 case TokenKind::MinusEqual:
                 case TokenKind::StarEqual:
                 case TokenKind::ForSlashEqual:
-                case TokenKind::PercentEqual:
+                case TokenKind::PercentEqual: {
+                    binary->type = left_type;
                     return left_type; // safe: both are same and numeric
+                }
 
                 case TokenKind::EqualEqual:
                 case TokenKind::NotEqual:
@@ -256,19 +261,24 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
                 case TokenKind::GreaterThan:
                 case TokenKind::GreaterEqual:
                 case TokenKind::And:
-                case TokenKind::Or:
+                case TokenKind::Or: {
+                    binary->type = SmplType::Boolean;
                     return SmplType::Boolean;
+                }
 
                 case TokenKind::As: {
                     if (binary->right->get_kind() != ExprASTKind::Type)
                         throw CompilerError("Expected a type for right hand operand for 'as' opeprator", binary->right->get_line());
                     if (tc::is_castable(left_type, right_type)) {
+                        binary->left->type = right_type;
+                        binary->type = right_type;
                         return right_type;
                     }
                     throw TypeError(std::format("Invalid cast from {} to {}", left_type_str.str(), right_type_str.str()), binary->op.line);
                 }
 
                 case TokenKind::Range:
+                    binary->type = SmplType::Range;
                     return SmplType::Range;
 
                 default:
@@ -279,7 +289,7 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
         case ExprASTKind::FnCall: {
             FuncCallNode* fncall = dynamic_cast<FuncCallNode*>(expr.get());
             Symbol* fndecl = nullptr;
-            SmplType arg_type = analyze_expr(fncall->args[0]);
+            auto arg_type = analyze_expr(fncall->args[0]);
             switch (builtin::get_builtin(fncall->identifier.lexeme)) {
                 case builtin::PrintFunc: {
                     if (tc::is_integer(arg_type)) {
@@ -298,13 +308,16 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
                             {builtin::PrintFunc, {SmplType::String}}
                         });
                     } else {
-                        throw TypeError("Built-in 'print' function only accepts integer, float, and string expressions", fncall->get_line());
+                        std::ostringstream oss;
+                        oss << magic_enum::enum_name(arg_type);
+                        throw TypeError(std::format("Built-in 'print' function only accepts integer, float, and string expressions. Got {} instead", oss.str()), fncall->get_line());
                     }
                     // Skip type checking
                     auto fn_symbol = dynamic_cast<FuncSymbol*>(fndecl);
                     if (fncall->args.size() != fn_symbol->param_types.size()) {
                         throw CompilerError(std::format("Function call '{}' has {} arguments, expected {}", fncall->identifier.lexeme, fncall->args.size(), fn_symbol->param_types.size()), fncall->get_line());
                     }
+                    fncall->type = SmplType::Void;
                     return SmplType::Void;
                 } break;
                 case builtin::None: {
@@ -317,9 +330,8 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
 
             auto fn_symbol = dynamic_cast<FuncSymbol*>(fndecl);
             if (fncall->args.size() != fn_symbol->param_types.size()) {
-                throw CompilerError(std::format("Function call '{}' has {} arguments, expected {}",
-                                                        fncall->identifier.lexeme, fncall->args.size(), fn_symbol->param_types.size()),
-                                    fncall->get_line());
+                throw CompilerError(std::format("Function call '{}' has {} arguments, expected {}", fncall->identifier.lexeme, fncall->args.size(), fn_symbol->param_types.size()),
+                        fncall->get_line());
             }
 
             auto& param_types = fn_symbol->param_types;
@@ -331,11 +343,15 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
                 }
             }
 
+            fncall->type = fn_symbol->return_type;
             return fn_symbol->return_type;
         }
         case ExprASTKind::Grouping: {
             GroupingExpr* group = dynamic_cast<GroupingExpr*>(expr.get());
-            return analyze_expr(group->expr);
+            SmplType type = analyze_expr(group->expr);
+            group->expr->type = type;
+            group->type = type;
+            return type;
         }
         case ExprASTKind::Identifier: {
             IdentifierNode* identifier = dynamic_cast<IdentifierNode*>(expr.get());
@@ -345,15 +361,20 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
             }
 
             auto var_symbol = dynamic_cast<VarSymbol*>(variable);
+            identifier->type = var_symbol->type;
             return var_symbol->type;
         }
         case ExprASTKind::Type: {
             TypeNode* type_node = dynamic_cast<TypeNode*>(expr.get());
-            return tc::str_to_type(type_node->type.lexeme, type_node->get_line());
+            SmplType type = tc::str_to_type(type_node->type.lexeme, type_node->get_line());
+            type_node->smpl_type = type;
+            return type;
         }
         case ExprASTKind::NumberLiteral: {
             NumLitNode* numlit = dynamic_cast<NumLitNode*>(expr.get());
-            return (numlit->literal.lexeme.contains(".")) ? SmplType::UntypedFloat : SmplType::UntypedInt;
+            SmplType type = (numlit->literal.lexeme.contains(".")) ? SmplType::UntypedFloat : SmplType::UntypedInt;
+            numlit->type = type;
+            return type;
         }
         case ExprASTKind::Unary: {
             UnaryNode* unary = dynamic_cast<UnaryNode*>(expr.get());
@@ -363,11 +384,13 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
                     if (right_type != SmplType::Boolean) {
                         throw TypeError("Logical 'not' operator only accepts a boolean operand", unary->get_line());
                     }
+                    unary->type = SmplType::Boolean;
                     return SmplType::Boolean;
                 case TokenKind::Minus: {
                     if (!tc::is_numeric(right_type)) {
                         throw TypeError("Negation '-' operator only accepts numeric values as an operand", unary->get_line());
                     }
+                    unary->type = right_type;
                     return right_type;
                 }
                 default:
@@ -386,6 +409,7 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
             if (if_val_type != else_val_type)
                 throw TypeError("Default value and the else value must be the same type", cond_expr->get_line());
 
+            cond_expr->type = if_val_type;
             return if_val_type;
         }
         case ExprASTKind::StringLiteral: return SmplType::String;

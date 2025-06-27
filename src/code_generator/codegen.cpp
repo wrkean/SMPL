@@ -253,8 +253,9 @@ std::string CodeGenerator::gen_fncall(FuncCallNode* fncall_node) {
     std::string result;
     switch (builtin::get_builtin(fncall_node->identifier.lexeme)) {
         case builtin::PrintFunc: {
-            auto& caller = analyzer.builtin_calls.at(fncall_node->identifier.lexeme);
-            auto& arg_type = caller.at(builtin::PrintFunc)[0];
+            // auto& caller = analyzer.builtin_calls.at(fncall_node->identifier.lexeme);
+            // auto& arg_type = caller.at(builtin::PrintFunc)[0];
+            auto arg_type = fncall_node->args[0]->get_type();
             switch (arg_type) {
                 case SmplType::Int:
                     result = std::format("printf(\"%d\", {})", gen_expression(fncall_node->args[0]));

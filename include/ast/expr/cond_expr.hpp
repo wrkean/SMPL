@@ -13,6 +13,7 @@ public:
                  size_t line);
     void print() const override;
     ExprASTKind get_kind() const override { return kind; }
+    SmplType get_type() const override { return type; }
     size_t get_line() const override { return line; }
 
     std::unique_ptr<ExprNode> if_val;
