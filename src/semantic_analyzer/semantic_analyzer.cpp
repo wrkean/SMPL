@@ -38,7 +38,7 @@
 
 // TODO: Finish and clean these up
 SemanticAnalyzer::SemanticAnalyzer(std::vector<std::unique_ptr<StmtNode>>& program)
-    : program(program), cur_func_return_type(SmplType::Unknown), builtin_calls({})
+    : program(program), cur_func_return_type(SmplType::Unknown)
 {
     enter_scope();
     // Declare builtins
@@ -294,19 +294,10 @@ SmplType SemanticAnalyzer::analyze_expr(std::unique_ptr<ExprNode>& expr) {
                 case builtin::PrintFunc: {
                     if (tc::is_integer(arg_type)) {
                         fndecl = lookup("print_int");
-                        builtin_calls.emplace(fncall->identifier.lexeme, std::unordered_map<builtin::BuiltInKind, std::vector<SmplType>>{
-                            {builtin::PrintFunc, {SmplType::Int}}
-                        });
                     } else if (tc::is_floating(arg_type)) {
                         fndecl = lookup("print_float");
-                        builtin_calls.emplace(fncall->identifier.lexeme, std::unordered_map<builtin::BuiltInKind, std::vector<SmplType>>{
-                            {builtin::PrintFunc, {SmplType::Float32}}
-                        });
                     } else if (arg_type == SmplType::String) {
                         fndecl = lookup("print_str");
-                        builtin_calls.emplace(fncall->identifier.lexeme, std::unordered_map<builtin::BuiltInKind, std::vector<SmplType>>{
-                            {builtin::PrintFunc, {SmplType::String}}
-                        });
                     } else {
                         std::ostringstream oss;
                         oss << magic_enum::enum_name(arg_type);

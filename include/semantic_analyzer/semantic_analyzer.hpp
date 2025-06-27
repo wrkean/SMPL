@@ -2,7 +2,6 @@
 
 #include "ast/expr/expr.hpp"
 #include "ast/stmt/stmt.hpp"
-#include "smpl/builtins.hpp"
 #include "smpl/symbol/symbol.hpp"
 #include "smpl/types.hpp"
 #include <memory>
@@ -15,7 +14,6 @@ public:
     SemanticAnalyzer(std::vector<std::unique_ptr<StmtNode>>& program);
 
     std::vector<std::unordered_map<std::string, std::unique_ptr<Symbol>>> symbol_table;
-    std::unordered_map<std::string, std::unordered_map<builtin::BuiltInKind, std::vector<SmplType>>> builtin_calls;
 
     std::vector<std::unique_ptr<StmtNode>>& program;
     SmplType cur_func_return_type;
