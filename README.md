@@ -58,7 +58,7 @@ defn main() {
 - 🟢 Lexical analysis done (Lexing). It's just a matter of expanding now.
 - 🟢 Syntax analysis (Parsing) done for now. Will expand later.
 - 🟡 Semantic Analysis done, but needs better error messages.
-- ❌ Code generation. Given a no-error AST, turns it into an equivalent and valid C program
+- Can now generate code!
 
 # Primitive Types
 An integer's name can be composed of its signedness and its bit-width. For example, i32 means it is a signed 32-bit integer and u32 means it is an unsigned 32-bit integer.
