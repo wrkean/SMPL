@@ -151,10 +151,10 @@ std::unique_ptr<StmtNode> Parser::parse_fndecl() {
     // Get return type
     std::optional<Token> return_type;
     if (peek().kind == TokenKind::ThinArrow) {
-        advance();      // Consume '->'
+        advance(); // Consume '->'
         return_type = consume(TokenKind::Type);
     } else if (!is_main && peek().kind != TokenKind::LeftBrace) {
-        throw SyntaxError("Expected block{} or '->'", peek().line);
+        throw SyntaxError("Expected block{} or '->", peek().line);
     } else if (is_main) {
         Token implicit_type(TokenKind::Type, "int", peek().line);
         return_type = implicit_type;

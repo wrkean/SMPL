@@ -16,7 +16,6 @@
 #include "ast/stmt/param.hpp"
 #include "semantic_analyzer/semantic_analyzer.hpp"
 #include "smpl/builtins.hpp"
-#include "smpl/type_checker.hpp"
 #include "smpl/types.hpp"
 #include "token/tokenkind.hpp"
 #include <format>
@@ -26,15 +25,17 @@
 #include <utility>
 
 CodeGenerator::CodeGenerator(std::vector<std::unique_ptr<StmtNode>>& program, SemanticAnalyzer& analyzer)
-    : program(program), analyzer(analyzer), output_file("generated.c") { }
+    : program(program), analyzer(analyzer), output_file("../c_code/generated.c"), indent_level(0) { }
 
 void CodeGenerator::gen() {
     // Include important headers
     output_file << "#include <stdio.h>\n";
+    output_file << "#include <stdbool.h>\n";
     output_file << "#include <stdint.h>\n\n";
     for (auto& statement: program) {
         gen_statement(statement);
     }
+    output_file.close();
 }
 
 void CodeGenerator::gen_statement(std::unique_ptr<StmtNode>& stmt) {
@@ -72,7 +73,7 @@ void CodeGenerator::gen_statement(std::unique_ptr<StmtNode>& stmt) {
 void CodeGenerator::gen_assignment(AssignmentNode* assignment) {
     indent();
     std::string ass_str = std::format(
-        "{} {} = {}",
+        "{} {} = {};\n",
         map_type(assignment->var_type.lexeme),
         assignment->variable.lexeme,
         gen_expression(assignment->right)
@@ -82,7 +83,7 @@ void CodeGenerator::gen_assignment(AssignmentNode* assignment) {
 }
 
 void CodeGenerator::gen_block(BlockNode* block) {
-    output_file << "{";
+    output_file << "{\n";
     indent_level++;
     for (auto& stmt : block->statements) {
         gen_statement(stmt);
@@ -100,10 +101,20 @@ void CodeGenerator::gen_expr_stmt(ExprStmt* expr_stmt) {
 void CodeGenerator::gen_fndecl(DefnNode* fndecl) {
     indent();
 
+    std::string type;
+    if (fndecl->identifier.lexeme == "main") {
+        type = "int";
+    } else {
+        if (fndecl->return_type.has_value()) {
+            type = map_type(fndecl->return_type.value().lexeme);
+        } else {
+            type = "void";
+        }
+    }
+
     std::string fndecl_str = std::format(
         "{} {}",
-        (fndecl->return_type.has_value() ?
-         map_type(fndecl->return_type.value().lexeme) : "void"),
+        type,
         fndecl->identifier.lexeme
     );
 
@@ -131,6 +142,7 @@ void CodeGenerator::gen_params(ParamNode* param_node) {
 void CodeGenerator::gen_for(ForNode* for_node) {
     // NOTE: Not expandable as it only works on range expressions,
     // modify later.
+    indent();
     auto range_op = dynamic_cast<BinaryExpr*>(for_node->iterator.get());
     std::string for_str = std::format(
         "for (int {} = {}; {} < {}; {}++) ",
@@ -140,6 +152,7 @@ void CodeGenerator::gen_for(ForNode* for_node) {
         gen_expression(range_op->right),
         for_node->bind_var.lexeme
     );
+    output_file << for_str;
     gen_block(dynamic_cast<BlockNode*>(for_node->block.get()));
 }
 
@@ -202,16 +215,26 @@ std::string CodeGenerator::gen_expression(std::unique_ptr<ExprNode>& expr) {
 
 std::string CodeGenerator::gen_binary(BinaryExpr* binary_expr) {
     std::string op = binary_expr->op.lexeme;
-    if (binary_expr->op.kind == TokenKind::And) {
-        op = map_operator(TokenKind::And);
-    } else if (binary_expr->op.kind == TokenKind::Or) {
-        op = map_operator(TokenKind::Or);
+    // if (binary_expr->op.kind == TokenKind::And) {
+    //     op = map_operator(TokenKind::And);
+    // } else if (binary_expr->op.kind == TokenKind::Or) {
+    //     op = map_operator(TokenKind::Or);
+    // }
+    switch (binary_expr->op.kind) {
+        case TokenKind::And: {
+            op = map_operator(TokenKind::And);
+        } break;
+        case TokenKind::Or: {
+            op = map_operator(TokenKind::Or);
+        } break;
+        case TokenKind::As: {
+            auto right = dynamic_cast<TypeNode*>(binary_expr->right.get());
+            return std::format("({}) {}", map_type(right->type.lexeme), gen_expression(binary_expr->left));
+        }
+        default:
     }
 
-    std::string expr;
-
-    expr += gen_expression(binary_expr->left) +
-        " " + op + " " + gen_expression(binary_expr->right);
+    std::string expr = std::format("{} {} {}", gen_expression(binary_expr->left), op, gen_expression(binary_expr->right));
 
     return expr;
 }
@@ -221,7 +244,7 @@ std::string CodeGenerator::gen_boolean(BooleanLiteral* boolean_literal) {
 }
 
 std::string CodeGenerator::gen_cond_expr(CondExprNode* cond_expr) {
-    std::string expr = gen_expression(cond_expr->if_expr) + " ? " + gen_expression(cond_expr->if_val) + " : " + gen_expression(cond_expr->else_val);
+    std::string expr = std::format("{} ? {} : {}", gen_expression(cond_expr->if_expr), gen_expression(cond_expr->if_val), gen_expression(cond_expr->else_val));
 
     return expr;
 }
@@ -230,32 +253,38 @@ std::string CodeGenerator::gen_fncall(FuncCallNode* fncall_node) {
     std::string result;
     switch (builtin::get_builtin(fncall_node->identifier.lexeme)) {
         case builtin::PrintFunc: {
-            SmplType arg_type = analyzer.analyze_expr(fncall_node->args[0]);
-            if (tc::is_integer(arg_type)) {
-                result += "printf(\"%d\"," + gen_expression(fncall_node->args[0]) + ")";
-            } else if (tc::is_floating(arg_type)) {
-                result += "printf(\"%f\"," + gen_expression(fncall_node->args[0]) + ")";
-            } else if (arg_type == SmplType::String) {
-                result += "printf(\"%s\"," + gen_expression(fncall_node->args[0]) + ")";
+            auto& caller = analyzer.builtin_calls.at(fncall_node->identifier.lexeme);
+            auto& arg_type = caller.at(builtin::PrintFunc)[0];
+            switch (arg_type) {
+                case SmplType::Int:
+                    result = std::format("printf(\"%d\", {})", gen_expression(fncall_node->args[0]));
+                    break;
+                case SmplType::Float32:
+                    result = std::format("printf(\"%f\", {})", gen_expression(fncall_node->args[0]));
+                    break;
+                case SmplType::String:
+                    result = std::format("printf(\"%s\", {})", gen_expression(fncall_node->args[0]));
+                    break;
+                default:
             }
         } break;
         case builtin::None: {
-            result += fncall_node->identifier.lexeme + "(";
+            result = std::format("{} (", fncall_node->identifier.lexeme);
             for (auto it = fncall_node->args.begin(); it != fncall_node->args.end(); it++) {
-                result += gen_expression(*it);
+                result.append(gen_expression(*it));
 
                 if (it + 1 != fncall_node->args.end()) {
-                    result += ", ";
+                    result.append(", ");
                 }
             }
-            result += ")";
+            result.append(")");
         } break;
-    }
+     }
     return result;
 }
 
 std::string CodeGenerator::gen_grouping(GroupingExpr* grouping) {
-    return "(" + gen_expression(grouping->expr) + ")";
+    return std::format("({})", gen_expression(grouping->expr));
 }
 
 std::string CodeGenerator::gen_identifier(IdentifierNode* identifier) {
@@ -280,7 +309,7 @@ std::string CodeGenerator::gen_unary(UnaryNode* unary) {
         op = "!";
     }
 
-    return op + gen_expression(unary->right);
+    return std::format("{}{}", op, gen_expression(unary->right));
 }
 
 void CodeGenerator::indent() {
@@ -303,6 +332,7 @@ std::string CodeGenerator::map_type(const std::string& smpl_type) const {
         {"uint", "unsigned int"},
         {"f32", "float"},
         {"f64", "double"},
+        {"bool", "bool"},
     };
 
     return c_types.at(smpl_type);

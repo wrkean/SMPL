@@ -21,7 +21,18 @@ std::string file_to_strbuf(const std::string& path) {
     return buf.str();
 }
 
-void run(const std::string& source) {
+void compile_c_output(const std::string& filename, const std::string& output_name = "a.out") {
+    std::string cmd = std::format("gcc {} -o {}", filename, output_name);
+    int result = std::system(cmd.c_str());
+
+    if (result != 0) {
+        std::cerr << "Compilation failed.\n";
+    } else {
+        std::cout << "Compiled successfully to: " << output_name << "\n";
+    }
+}
+
+void generate_c(const std::string& source) {
     Lexer lexer(std::move(source)); // Lexer owns the source string
     auto& tokens = lexer.lex();
 
@@ -37,7 +48,7 @@ void run(const std::string& source) {
     // }
 
     SemanticAnalyzer analyzer(statements);
-    if (analyzer.analyze()) {
+    if (!analyzer.analyze()) {
         CodeGenerator codegen(statements, analyzer);
         codegen.gen();
     }
@@ -45,13 +56,19 @@ void run(const std::string& source) {
 
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        std::cerr << "Usage: " << argv[0] << " <source>\n";
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <source> <optional-output>\n";
         return 1;
     }
 
     std::string source = file_to_strbuf(argv[1]);
-    run(source);
+    generate_c(source);
+
+    if (argc > 2) {
+        compile_c_output("../c_code/generated.c", argv[2]);
+    } else {
+        compile_c_output("../c_code/generated.c", "exe");
+    }
 
     return 0;
 }
