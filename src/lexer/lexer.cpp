@@ -214,7 +214,7 @@ void Lexer::lex_string() {
 
     advance(); // Consume closing quote
 
-    std::string lexeme = source.substr(start + 1, current - start - 1);
+    std::string lexeme = source.substr(start + 1, current - start - 2);
     add_token(TokenKind::StringLiteral, lexeme);
 }
 
