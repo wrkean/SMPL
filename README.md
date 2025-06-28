@@ -6,7 +6,7 @@ This project has not been finished yet and won't be supporting OOP until the lan
 SMPL aims to be as simple as possible, much like C but with more type-safety and other safety features.
 # Prerequisites
 - [CMake](https://cmake.org/download/) (Optional if you want to build the code yourself)
-- clang (or any C++23 compiler)
+- clang (or any C++23 compiler) (at the moment, it just uses gcc. Please ignore this for now)
 # Build
 To build, execute `cmake .` under the same directory as CMakeLists.txt
 # Run
