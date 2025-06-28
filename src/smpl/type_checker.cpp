@@ -1,6 +1,7 @@
 #include "smpl/type_checker.hpp"
 #include "error_reporter/compiler_err.hpp"
 #include "smpl/types.hpp"
+#include <climits>
 #include <cstdint>
 #include <string>
 #include <unordered_map>
@@ -80,8 +81,12 @@ namespace tc {
                     return val >= INT32_MIN && val <= INT32_MAX;
                 }
                 case SmplType::Int64: {
-                    std::stoll(literal_value); // Check if it's valid
+                    std::stoll(literal_value);
                     return true;
+                }
+                case SmplType::Int: {
+                    long long val = std::stoll(literal_value);
+                    return val >= INT_MAX && val <= INT_MIN;
                 }
 
                 case SmplType::Uint8: {
@@ -99,6 +104,10 @@ namespace tc {
                 case SmplType::Uint64: {
                     unsigned long long val = std::stoull(literal_value);
                     return val <= std::numeric_limits<uint64_t>::max();
+                }
+                case SmplType::Uint: {
+                    unsigned long long val = std::stoull(literal_value);
+                    return val <= UINT_MAX;
                 }
 
                 case SmplType::Float32: {
