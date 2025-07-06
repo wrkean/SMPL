@@ -2,22 +2,9 @@
 #include "lexer/lexer.hpp"
 #include "parser/parser.hpp"
 #include "semantic_analyzer/semantic_analyzer.hpp"
-#include <fstream>
+#include "smpl/smpl.hpp"
 #include <iostream>
-#include <sstream>
 
-std::string file_to_strbuf(const std::string& path) {
-    std::ifstream source(path);
-    if (!source.is_open()) {
-        std::cerr << "Could not open file\n";
-        return "";
-    }
-
-    std::stringstream buf;
-    buf << source.rdbuf();
-
-    return buf.str();
-}
 
 void compile_c_output(const std::string& filename, const std::string& output_name = "a.out") {
     std::string cmd = std::format("gcc {} -o {}", filename, output_name);
@@ -59,7 +46,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    std::string source = file_to_strbuf(argv[1]);
+    std::string source = Smpl::file_to_strbuf(argv[1]);
     generate_c(source);
 
     if (argc > 2) {
